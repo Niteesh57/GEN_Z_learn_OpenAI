@@ -96,7 +96,7 @@ export interface GameLevel {
 // ─── Core Experience Types ────────────────────────────────────────────────────
 
 export interface Experience {
-  medium: 'COMIC' | 'BROWSER' | 'GAME' | 'MEME';
+  medium: 'COMIC' | 'BROWSER' | 'GAME' | 'MEME' | 'REELS';
   template: string;
   title: string;
   description: string;
@@ -113,7 +113,20 @@ export interface Experience {
     game_template?: GameTemplate;
     instructions?: string;
     levels?: GameLevel[];
+    // Reels
+    title?: string;
+    concept?: string;
+    reels?: ReelStep[];
   };
+}
+
+export interface ReelStep {
+  step: number;
+  title: string;
+  hook: string;
+  body: string;
+  takeaway: string;
+  voiceover: string;
 }
 
 export interface ChatInteraction {

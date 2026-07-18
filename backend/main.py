@@ -60,6 +60,9 @@ async def generate_experience(request: GenerateRequest):
     elif folder == "MEME":
         from app.agents.meme_agent import generate_meme_article
         result = await generate_meme_article(state)
+    elif folder == "REELS":
+        from app.agents.reels_agent import generate_reels
+        result = await generate_reels(state)
     else:
         result = await app_graph.ainvoke(state)
     

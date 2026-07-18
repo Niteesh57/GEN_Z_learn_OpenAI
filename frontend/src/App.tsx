@@ -8,6 +8,7 @@ import ComicRenderer from './components/renderers/ComicRenderer';
 import BrowserRenderer from './components/renderers/BrowserRenderer';
 import GameRenderer from './components/renderers/GameRenderer';
 import MemeRenderer from './components/renderers/MemeRenderer';
+import ReelsRenderer from './components/renderers/ReelsRenderer';
 import IntroScreen from './components/ui/IntroScreen';
 
 type GameChoice = 'AUTO' | GameTemplate;
@@ -24,9 +25,9 @@ const GAME_CHOICES: Array<{ id: GameChoice; icon: string; title: string; detail:
   { id: 'CIRCUIT_CONNECT', icon: 'hub', title: 'Circuit Connect', detail: 'Link related concepts' },
 ];
 
-function GameTemplatePicker({ selected, onSelect, compact = false }: { selected: GameChoice; onSelect: (value: GameChoice) => void; compact?: boolean }) {
+function GameTemplatePicker({ selected, onSelect }: { selected: GameChoice; onSelect: (value: GameChoice) => void }) {
   return (
-    <section className={`game-template-picker ${compact ? 'game-template-picker-compact' : ''}`} aria-label="Choose a game type">
+    <section className="game-template-picker" aria-label="Choose a game type">
       <div className="game-template-picker-heading"><span>CHOOSE YOUR GAME</span><small>{selected === 'AUTO' ? 'Auto pick is active' : `Selected: ${GAME_CHOICES.find((choice) => choice.id === selected)?.title}`}</small></div>
       <div className="game-template-grid">
         {GAME_CHOICES.map((choice) => <button key={choice.id} type="button" aria-pressed={selected === choice.id} onClick={() => onSelect(choice.id)} className={`game-template-option game-template-${choice.id.toLowerCase().replace('_', '-')} ${selected === choice.id ? 'is-selected' : ''}`}>
@@ -35,6 +36,42 @@ function GameTemplatePicker({ selected, onSelect, compact = false }: { selected:
       </div>
     </section>
   );
+}
+
+function GameTemplateDialog({ selected, onSelect, onClose }: { selected: GameChoice; onSelect: (value: GameChoice) => void; onClose: () => void }) {
+  return (
+    <div className="game-template-backdrop" role="presentation" onMouseDown={onClose}>
+      <div className="game-template-dialog" role="dialog" aria-modal="true" aria-labelledby="game-picker-title" onMouseDown={(event) => event.stopPropagation()}>
+        <button type="button" className="game-template-close" onClick={onClose} aria-label="Close game picker">×</button>
+        <p id="game-picker-title" className="game-template-dialog-kicker">GAME MODE SELECTOR</p>
+        <GameTemplatePicker selected={selected} onSelect={(value) => { onSelect(value); onClose(); }} />
+      </div>
+    </div>
+  );
+}
+
+function GameModeTrigger({ selected, onClick }: { selected: GameChoice; onClick: () => void }) {
+  const current = GAME_CHOICES.find((choice) => choice.id === selected) ?? GAME_CHOICES[0];
+  return <button type="button" onClick={onClick} className={`game-mode-trigger game-template-${current.id.toLowerCase().replace('_', '-')}`}><span className="material-symbols-outlined">{current.icon}</span><span><small>GAME MODE</small><strong>{current.title}</strong></span><span className="material-symbols-outlined game-mode-trigger-arrow">expand_more</span></button>;
+}
+
+const MODE_SHOWCASE = [
+  { id: 'reels', icon: 'play_circle', label: 'REELS', caption: 'fast ideas' },
+  { id: 'comics', icon: 'auto_stories', label: 'COMICS', caption: 'visual stories' },
+  { id: 'games', icon: 'sports_esports', label: 'GAMES', caption: 'learn by play' },
+  { id: 'browser', icon: 'web', label: 'BROWSER', caption: 'guided clicks' },
+  { id: 'memes', icon: 'sentiment_very_satisfied', label: 'MEMES', caption: 'quick laughs' },
+];
+
+function ModeShowcase() {
+  return <div className="mode-showcase" aria-label="Learning modes: Reels, Comics, Games, Browser, and Memes">
+    <div className="mode-showcase-stage">
+      <div className="mode-showcase-ring" />
+      <div className="mode-showcase-core"><span className="material-symbols-outlined">bolt</span><small>EXPLORE</small></div>
+      {MODE_SHOWCASE.map((mode) => <div key={mode.id} className={`mode-showcase-card mode-showcase-${mode.id}`}><span className="material-symbols-outlined">{mode.icon}</span><strong>{mode.label}</strong><small>{mode.caption}</small></div>)}
+      <span className="mode-showcase-spark mode-showcase-spark-a">✦</span><span className="mode-showcase-spark mode-showcase-spark-b">✦</span><span className="mode-showcase-spark mode-showcase-spark-c">✦</span>
+    </div>
+  </div>;
 }
 
 function App() {
@@ -46,6 +83,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [expandedInteractionIndex, setExpandedInteractionIndex] = useState<number | null>(null);
   const [gameTemplate, setGameTemplate] = useState<GameChoice>('AUTO');
+  const [gamePickerOpen, setGamePickerOpen] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -108,6 +146,7 @@ function App() {
       case 'BROWSER': return <BrowserRenderer data={data} />;
       case 'GAME': return <GameRenderer data={data} />;
       case 'MEME': return <MemeRenderer data={data} />;
+      case 'REELS': return <ReelsRenderer data={data} />;
       default: return <div className="p-6 text-red-700">This learning format is unavailable.</div>;
     }
   };
@@ -118,16 +157,16 @@ function App() {
     <div className={`genz-shell ${featureClass}`}>
       <Sidebar
         sessions={sessions.filter((session) => session.category === activeFolder)} currentSessionId={currentSessionId} activeFolder={activeFolder}
-        onSelectFolder={(folder) => { setActiveFolder(folder); setCurrentSessionId(null); setConcept(''); setExpandedInteractionIndex(null); setGameTemplate('AUTO'); }}
+        onSelectFolder={(folder) => { setActiveFolder(folder); setCurrentSessionId(null); setConcept(''); setExpandedInteractionIndex(null); setGameTemplate('AUTO'); setGamePickerOpen(folder === 'GAME'); }}
         onSelectSession={(id) => { setCurrentSessionId(id); setExpandedInteractionIndex(null); }}
         onDeleteSession={(id) => setSessions((previous) => previous.filter((session) => session.id !== id))}
         onNewChat={() => { setCurrentSessionId(null); setConcept(''); setExpandedInteractionIndex(null); }}
       />
       <main className="genz-main">
         {!activeFolder ? (
-          <section className="empty-state"><span>✦</span><h2>Choose your learning mode</h2><p>Pick a colorful mode from the sidebar to start creating an interactive lesson.</p></section>
+          <section className="empty-state mode-empty-state"><ModeShowcase /><h2>Choose your learning mode</h2><p>Pick a colorful mode from the sidebar to start creating an interactive lesson.</p></section>
         ) : interactions.length === 0 ? (
-          <section className="welcome-panel"><WelcomeScreen />{activeFolder === 'GAME' && <GameTemplatePicker selected={gameTemplate} onSelect={setGameTemplate} />}<ChatInput concept={concept} setConcept={setConcept} onSubmit={handleSearch} loading={loading} /></section>
+          <section className="welcome-panel"><WelcomeScreen />{activeFolder === 'GAME' && <GameModeTrigger selected={gameTemplate} onClick={() => setGamePickerOpen(true)} />}<ChatInput concept={concept} setConcept={setConcept} onSubmit={handleSearch} loading={loading} /></section>
         ) : (
           <section className="lesson-log">
             <div className="lesson-scroll">
@@ -140,10 +179,11 @@ function App() {
               })}
               <div ref={chatEndRef} />
             </div>
-            <div className="lesson-input">{activeFolder === 'GAME' && <GameTemplatePicker selected={gameTemplate} onSelect={setGameTemplate} compact />}<ChatInput concept={concept} setConcept={setConcept} onSubmit={handleSearch} loading={loading} variant="compact" /></div>
+            <div className="lesson-input">{activeFolder === 'GAME' && <GameModeTrigger selected={gameTemplate} onClick={() => setGamePickerOpen(true)} />}<ChatInput concept={concept} setConcept={setConcept} onSubmit={handleSearch} loading={loading} variant="compact" /></div>
           </section>
         )}
       </main>
+      {activeFolder === 'GAME' && gamePickerOpen && <GameTemplateDialog selected={gameTemplate} onSelect={setGameTemplate} onClose={() => setGamePickerOpen(false)} />}
     </div>
   );
 }

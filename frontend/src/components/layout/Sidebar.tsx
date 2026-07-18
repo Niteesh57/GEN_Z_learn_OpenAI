@@ -12,10 +12,11 @@ interface SidebarProps {
 }
 
 const CONCEPTS = [
+  { id: 'REELS', label: 'Reels', icon: 'smart_display' },
   { id: 'GAME', label: 'Gaming', icon: 'sports_esports' },
-  { id: 'COMIC', label: 'Comics', icon: 'auto_stories', badge: 'FOUNDRY IQ' },
+  { id: 'COMIC', label: 'Comics', icon: 'auto_stories' },
   { id: 'BROWSER', label: 'Browser', icon: 'web' },
-  { id: 'MEME', label: 'Meme', icon: 'sentiment_very_satisfied', badge: 'FOUNDRY IQ' },
+  { id: 'MEME', label: 'Meme', icon: 'sentiment_very_satisfied' },
 ];
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -34,13 +35,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div className="font-label-caps text-primary-fixed-dim tracking-widest flex items-center gap-2 text-[14px]">
           <span className="material-symbols-outlined text-[20px]">terminal</span>
           The way Gen_Z learn's
-        </div>
-        <div className="text-[11px] text-on-surface-variant mt-1 opacity-70">
-          Interactive learning studio
-        </div>
-        <div className="inline-flex items-center gap-1.5 px-2 py-0.5 mt-1.5 rounded bg-primary-fixed-dim/15 border border-primary-fixed-dim/30 text-[9px] font-bold tracking-wider text-primary-fixed-dim self-start font-mono select-none">
-          <span className="w-1.5 h-1.5 rounded-full bg-primary-fixed-dim animate-pulse"></span>
-          READY TO EXPLORE
         </div>
       </div>
 
@@ -63,11 +57,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       {concept.icon}
                     </span>
                     {concept.label}
-                    {concept.badge && (
-                      <span className="ml-1 px-1.5 py-0.5 rounded text-[8px] bg-primary-fixed-dim/20 text-primary-fixed-dim border border-primary-fixed-dim/30 whitespace-nowrap animate-badge-shine">
-                        {concept.badge}
-                      </span>
-                    )}
                   </span>
                   <span className="material-symbols-outlined text-[14px] opacity-50 group-hover:opacity-100 transition-opacity">
                     chevron_right

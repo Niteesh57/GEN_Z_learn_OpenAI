@@ -6,7 +6,7 @@ export const WelcomeScreen: React.FC = () => {
 
   return (
     <div className="mb-12 text-center font-mono select-none">
-      <h2 className="font-headline-lg text-headline-lg text-primary-fixed-dim mb-4 min-h-[40px] drop-shadow-[0_0_8px_var(--theme-glow)] transition-all">
+      <h2 className="welcome-prompt font-headline-lg text-headline-lg mb-4 min-h-[40px] transition-all">
         {displayText}
         {isDone ? <span className="cursor-blink"></span> : <span className="cursor-blink"></span>}
       </h2>
