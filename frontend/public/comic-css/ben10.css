@@ -1,0 +1,71 @@
+/* Ben10 / Omnitrix CSS Bundle — extracted from test3.html */
+.comic-universe-ben10 .comic-book-spread {
+  background-color: #f0f0f0; border: 4px solid #111; border-radius: 3px;
+  box-shadow: 10px 10px 0px #39ff14, 14px 14px 0px #111, 25px 25px 30px rgba(0,0,0,0.8);
+  transform: rotate(-1deg); font-family: 'Impact', sans-serif;
+}
+.comic-universe-ben10 .comic-card {
+  padding: 20px; text-align: center; position: relative; box-sizing: border-box;
+  border: 5px solid #000; overflow: hidden; min-height: 320px; display: flex;
+  flex-direction: column; justify-content: flex-end; box-shadow: 5px 5px 0px rgba(0,0,0,0.3);
+  background: #1a2e1a;
+}
+.comic-universe-ben10 .speech-bubble {
+  color: #111 !important;
+  position: absolute; background: #ffffff; color: #000000; padding: 8px 12px;
+  border: 3px solid #000000; box-shadow: 3px 3px 0 rgba(0,0,0,0.3);
+  font-family: 'VT323',monospace; font-size: 18px; font-weight: bold;
+  line-height: 1.1; max-width: 60%; z-index: 4; pointer-events: none;
+  border-radius: 8px;
+}
+.comic-universe-ben10 .speech-bubble::after {
+  content: ''; position: absolute; bottom: -11px; left: 20px; width: 8px; height: 8px;
+  background-color: #fff; border-right: 3px solid #000; border-bottom: 3px solid #000;
+  transform: rotate(45deg);
+}
+.comic-universe-ben10 .action-text {
+  position: absolute; font-size: 24px; color: #ffffff; font-family: 'Impact', sans-serif;
+  text-shadow: -3px -3px 0 #000, 3px -3px 0 #000, -3px 3px 0 #000, 3px 3px 0 #000, 0 0 10px rgba(255,255,255,0.8);
+  transform: rotate(-10deg) scale(1); animation: ben10-pulse 1.5s infinite alternate;
+  pointer-events: none; z-index: 6; bottom: 20px; right: 15px;
+}
+@keyframes ben10-pulse { 0% { transform: rotate(-10deg) scale(0.95); filter: hue-rotate(0deg); } 100% { transform: rotate(-5deg) scale(1.1); filter: hue-rotate(45deg); } }
+/* Hero base — Ben10 uses CSS-drawn alien canvas panels. We style the panel container itself. */
+.comic-universe-ben10 .alien-hero {
+  position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
+  width: 120px; height: 160px;
+}
+.comic-universe-ben10 .alien-hero > div { position: absolute; }
+/* Heatblast-style alien */
+.comic-universe-ben10 .heatblast .alien-head { width: 80px; height: 80px; background: #ff6b00; border-radius: 50%; left: 20px; top: 20px; border: 4px solid #000; box-shadow: 0 0 15px #ff4400, inset 0 0 20px #ffaa00; animation: ben10-glow 1s infinite alternate; }
+@keyframes ben10-glow { 0% { box-shadow: 0 0 10px #ff4400; } 100% { box-shadow: 0 0 25px #ff8800; } }
+.comic-universe-ben10 .heatblast .alien-eyes { position: absolute; top: 30px; left: 15px; width: 50px; display: flex; justify-content: space-between; z-index: 6; }
+.comic-universe-ben10 .heatblast .alien-eye { width: 14px; height: 14px; background: #fff; border-radius: 50%; border: 3px solid #000; box-shadow: 0 0 5px #ffaa00; }
+.comic-universe-ben10 .heatblast .alien-body { width: 60px; height: 50px; background: #ff6b00; border: 4px solid #000; border-radius: 15px; bottom: 0; left: 30px; box-shadow: 0 0 10px #ff4400; }
+/* Diamondhead */
+.comic-universe-ben10 .diamondhead .alien-head { width: 50px; height: 80px; background: #00d4aa; border: 4px solid #000; left: 35px; top: 10px; clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%); }
+.comic-universe-ben10 .diamondhead .alien-eyes { position: absolute; top: 35px; left: 10px; width: 30px; display: flex; justify-content: space-between; z-index: 6; }
+.comic-universe-ben10 .diamondhead .alien-eye { width: 10px; height: 10px; background: #fff; border-radius: 0; border: 2px solid #000; transform: rotate(45deg); }
+.comic-universe-ben10 .diamondhead .alien-body { width: 55px; height: 50px; background: #00d4aa; border: 4px solid #000; border-radius: 10px; bottom: 0; left: 32px; }
+/* XLR8 */
+.comic-universe-ben10 .xlr8 .alien-head { width: 70px; height: 60px; background: #0066ff; border-radius: 40px 40px 20px 20px; left: 25px; top: 25px; border: 4px solid #000; }
+.comic-universe-ben10 .xlr8 .alien-eyes { position: absolute; top: 20px; left: 10px; width: 50px; display: flex; justify-content: space-between; z-index: 6; }
+.comic-universe-ben10 .xlr8 .alien-eye { width: 16px; height: 10px; background: #00ffff; border-radius: 5px; border: 2px solid #000; box-shadow: 0 0 8px #00ffff; }
+.comic-universe-ben10 .xlr8 .alien-body { width: 50px; height: 55px; background: #0044cc; border: 4px solid #000; border-radius: 10px 10px 0 0; bottom: 0; left: 35px; }
+/* Upgrade */
+.comic-universe-ben10 .upgrade .alien-head { width: 80px; height: 80px; background: #111; border-radius: 40px 40px 30px 30px; left: 20px; top: 20px; border: 4px solid #00ff44; box-shadow: 0 0 12px #00ff44; }
+.comic-universe-ben10 .upgrade .alien-eyes { position: absolute; top: 30px; left: 15px; width: 50px; display: flex; justify-content: space-between; z-index: 6; }
+.comic-universe-ben10 .upgrade .alien-eye { width: 18px; height: 8px; background: #00ff44; border-radius: 0; border: 2px solid #000; box-shadow: 0 0 8px #00ff44; }
+.comic-universe-ben10 .upgrade .alien-body { width: 60px; height: 50px; background: #111; border: 4px solid #00ff44; border-radius: 10px; bottom: 0; left: 30px; }
+/* Backgrounds */
+.comic-universe-ben10 .bg-alien-city { background: linear-gradient(to bottom, #0b1c0b, #1a3a1a); background-image: radial-gradient(#39ff14 1px, transparent 2px); background-size: 20px 20px; }
+.comic-universe-ben10 .bg-alien-city .action-text { text-shadow: 0 0 10px #39ff14; }
+.comic-universe-ben10 .bg-space { background: radial-gradient(ellipse at center, #0a0a2e, #000); background-image: radial-gradient(#fff 2px, transparent 3px); background-size: 50px 50px; }
+.comic-universe-ben10 .bg-omnitrix { background: #0b1c0b; border: 3px solid #39ff14; box-shadow: inset 0 0 30px rgba(57,255,20,0.2); }
+.comic-universe-ben10 .bg-desert { background: linear-gradient(to bottom, #87ceeb 50%, #daa520 50%); }
+/* Poses */
+.comic-universe-ben10 .pose-action .alien-hero { animation: ben10-attack 0.4s ease-in-out infinite alternate; }
+@keyframes ben10-attack { 0% { transform: translateX(-50%) scale(1.05) rotate(-3deg); } 100% { transform: translateX(-50%) scale(1.1) rotate(3deg); } }
+.comic-universe-ben10 .pose-thinking .alien-hero { animation: ben10-idle 2s ease-in-out infinite; }
+@keyframes ben10-idle { 0%,100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(-4px); } }
+.comic-universe-ben10 .pose-pointing .alien-hero { animation: ben10-idle 2s ease-in-out infinite; }

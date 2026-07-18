@@ -1,0 +1,56 @@
+/* Glitch Rider CSS Bundle — extracted from test.html (Cyberpunk Pixel Art) */
+.comic-universe-glitch_rider .comic-book-spread {
+  background-color: #150f24; border: 4px solid #000; border-radius: 4px;
+  box-shadow: 0 12px 36px rgba(0,0,0,0.6); font-family: 'VT323',monospace; font-size: 20px;
+  background: #0c0816; padding: 16px;
+}
+.comic-universe-glitch_rider .comic-card {
+  position: relative; overflow: hidden; height: 380px; cursor: pointer;
+  transition: transform 0.2s ease; background-color: #150f24; border: 4px solid #000;
+  box-shadow: 0 0 0 -2px #6d4b97, 0 4px 0 -2px #3b2a5c, -4px 0 0 -2px #6d4b97, 4px 0 0 -2px #3b2a5c, inset 0 0 0 2px #000;
+}
+.comic-universe-glitch_rider .comic-card:hover { transform: scale(1.02); z-index: 10; }
+.comic-universe-glitch_rider .caption-box {
+  position: absolute; top: 12px; left: 12px; right: 12px; padding: 8px 12px;
+  font-family: 'VT323',monospace; font-size: 22px; line-height: 1.1;
+  background-color: #00ffff; color: #0c0816; border: 3px solid #000; text-transform: uppercase;
+  font-weight: bold; box-shadow: 3px 3px 0 #000; pointer-events: none; z-index: 5;
+}
+.comic-universe-glitch_rider .caption-box.bottom { top: auto; bottom: 12px; background-color: #ff007f; color: #0c0816; }
+.comic-universe-glitch_rider .speech-bubble {
+  color: #111 !important;
+  position: absolute; background-color: #ffffff; color: #000000; padding: 8px 12px;
+  border: 3px solid #000; box-shadow: 3px 3px 0 rgba(0,0,0,0.3); font-family: 'VT323',monospace;
+  font-size: 18px; font-weight: bold; line-height: 1.1; max-width: 60%; z-index: 4; pointer-events: none;
+}
+.comic-universe-glitch_rider .speech-bubble::after {
+  content: ''; position: absolute; bottom: -11px; left: 20px; width: 8px; height: 8px;
+  background-color: #ffffff; border-right: 3px solid #000; border-bottom: 3px solid #000; transform: rotate(45deg);
+}
+.comic-universe-glitch_rider .sfx-text {
+  position: absolute; font-family: 'Press Start 2P',monospace; font-size: 24px; color: #fff;
+  text-shadow: -3px -3px 0 #000, 3px -3px 0 #000, -3px 3px 0 #000, 3px 3px 0 #000, 0 0 10px rgba(255,255,255,0.8);
+  transform: rotate(-10deg) scale(1); animation: gr-pulse 1.5s infinite alternate;
+  pointer-events: none; z-index: 6;
+}
+@keyframes gr-pulse { 0% { transform: rotate(-10deg) scale(0.95); filter: hue-rotate(0deg); } 100% { transform: rotate(-5deg) scale(1.1); filter: hue-rotate(45deg); } }
+.comic-universe-glitch_rider .panel-canvas { width: 100%; height: 100%; display: block; background-color: #000; }
+/* Palette variants applied to comic-universe-glitch_rider element */
+.comic-universe-glitch_rider.palette-gb { --gr-primary: #9bbc0f; --gr-secondary: #8bac0f; --gr-bg: #0f380f; --gr-panel: #306230; }
+.comic-universe-glitch_rider.palette-nes { --gr-primary: #f83800; --gr-secondary: #00b800; --gr-bg: #000000; --gr-panel: #202020; }
+.comic-universe-glitch_rider.palette-sunset { --gr-primary: #ffdd67; --gr-secondary: #ff8585; --gr-bg: #2b0f54; --gr-panel: #ab1f65; }
+/* Action word styling */
+.comic-universe-glitch_rider .action-text {
+  position: absolute; font-family: 'Press Start 2P',monospace; font-size: 20px;
+  color: #00ffff; text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000;
+  transform: rotate(-8deg); bottom: 20px; right: 15px; z-index: 6;
+}
+/* Backgrounds */
+.comic-universe-glitch_rider .bg-neotokyo { background: #0c0816; background-image: radial-gradient(#ff007f 1px, transparent 2px), radial-gradient(#00ffff 1px, transparent 2px); background-size: 40px 40px; background-position: 0 0, 20px 20px; }
+.comic-universe-glitch_rider .bg-matrix { background: #000; background-image: linear-gradient(rgba(0,255,0,0.1) 1px, transparent 1px); background-size: 100% 4px; }
+.comic-universe-glitch_rider .bg-circuit { background: #08050e; background-image: linear-gradient(90deg, rgba(0,255,255,0.05) 1px, transparent 1px), linear-gradient(rgba(0,255,255,0.05) 1px, transparent 1px); background-size: 30px 30px; }
+.comic-universe-glitch_rider .bg-void { background: radial-gradient(ellipse at center, #150f24, #000); }
+/* Poses */
+.comic-universe-glitch_rider .pose-action .panel-canvas { filter: drop-shadow(0 0 8px #00ffff); }
+.comic-universe-glitch_rider .pose-thinking .panel-canvas { filter: drop-shadow(0 0 4px #ff007f); }
+.comic-universe-glitch_rider .pose-pointing .panel-canvas { filter: drop-shadow(0 0 6px #00ffff) brightness(1.1); }

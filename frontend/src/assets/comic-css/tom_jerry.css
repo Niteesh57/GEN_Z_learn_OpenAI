@@ -1,0 +1,97 @@
+/* Tom & Jerry CSS Bundle — extracted from test5.html */
+.comic-universe-tom_jerry .comic-book-spread {
+  background-color: #fff; border: 6px solid #2c3e50; border-radius: 8px;
+  box-shadow: 10px 10px 0px #e74c3c, 14px 14px 0px #2c3e50, 25px 25px 30px rgba(0,0,0,0.4);
+  transform: rotate(-1deg); font-family: 'Comic Sans MS','Chalkboard SE',sans-serif;
+}
+.comic-universe-tom_jerry .comic-card {
+  padding: 20px; text-align: center; position: relative; box-sizing: border-box;
+  border: 5px solid #2c3e50; border-radius: 5px; overflow: hidden; min-height: 320px;
+  display: flex; flex-direction: column; justify-content: flex-end; box-shadow: 5px 5px 0px rgba(0,0,0,0.15);
+}
+.comic-universe-tom_jerry .speech-bubble {
+  color: #111 !important;
+  position: absolute; top: 15px; left: 15px; background: #fff; border: 3px solid #2c3e50;
+  border-radius: 20px; padding: 10px 15px; font-size: 14px; font-weight: bold;
+  z-index: 20; max-width: 60%; text-align: left; box-shadow: 3px 3px 0px #2c3e50;
+}
+.comic-universe-tom_jerry .speech-bubble::after {
+  content: ''; position: absolute; bottom: -15px; right: 20px;
+  border-width: 15px 15px 0 0; border-style: solid; border-color: #fff transparent transparent transparent;
+}
+.comic-universe-tom_jerry .speech-bubble::before {
+  content: ''; position: absolute; bottom: -19px; right: 18px;
+  border-width: 17px 17px 0 0; border-style: solid; border-color: #2c3e50 transparent transparent transparent; z-index: -1;
+}
+.comic-universe-tom_jerry .action-text {
+  background: #e74c3c; color: #fff; padding: 5px 15px; font-size: 1.6rem;
+  font-family: 'Impact', sans-serif; letter-spacing: 2px; border: 4px solid #2c3e50;
+  border-radius: 5px; display: inline-block; transform: rotate(-10deg); box-shadow: 4px 4px 0px #2c3e50;
+  position: absolute; bottom: 20px; right: 15px; z-index: 25;
+}
+/* Hero */
+.comic-universe-tom_jerry .tj-hero {
+  position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
+  width: 160px; height: 180px; animation: tj-scurry 1.5s infinite alternate;
+}
+@keyframes tj-scurry {
+  0% { transform: translate(-50%, 0px) rotate(-2deg); }
+  100% { transform: translate(-50%, -5px) rotate(2deg); }
+}
+.comic-universe-tom_jerry .tj-hero > div { position: absolute; }
+.comic-universe-tom_jerry .tj-hero .ear,
+.comic-universe-tom_jerry .tj-hero .snout,
+.comic-universe-tom_jerry .tj-hero .nose,
+.comic-universe-tom_jerry .tj-hero .jowl,
+.comic-universe-tom_jerry .tj-hero .diaper,
+.comic-universe-tom_jerry .tj-hero .collar { display: none; }
+.comic-universe-tom_jerry .head { width: 90px; height: 90px; border: 4px solid #2c3e50; left: 30px; top: 30px; z-index: 5; }
+.comic-universe-tom_jerry .eyes { top: 25px; width: 100%; display: flex; justify-content: center; gap: 4px; z-index: 6; }
+.comic-universe-tom_jerry .eye { width: 20px; height: 30px; background: #fff; border-radius: 50%; border: 3px solid #2c3e50; position: relative; overflow: hidden; }
+.comic-universe-tom_jerry .eye::after { content: ''; position: absolute; bottom: 5px; right: 4px; width: 8px; height: 8px; background: #000; border-radius: 50%; }
+.comic-universe-tom_jerry .mouth { bottom: 10px; left: 50%; transform: translateX(-50%); border: 3px solid #2c3e50; z-index: 7; }
+.comic-universe-tom_jerry .body { width: 70px; height: 60px; border: 4px solid #2c3e50; border-radius: 30px 30px 10px 10px; bottom: 0; left: 40px; z-index: 2; }
+/* Tom */
+.comic-universe-tom_jerry .tom .head { background: #697d91; border-radius: 40px 40px 30px 30px; }
+.comic-universe-tom_jerry .tom .ear { display: block; width: 0; height: 0; border-left: 20px solid transparent; border-right: 20px solid transparent; border-bottom: 40px solid #697d91; top: -5px; z-index: 4; }
+.comic-universe-tom_jerry .tom .ear.left { left: 5px; transform: rotate(-25deg); }
+.comic-universe-tom_jerry .tom .ear.right { right: 5px; transform: scaleX(-1) rotate(-25deg); }
+.comic-universe-tom_jerry .tom .eye { background: #ffeb3b; }
+.comic-universe-tom_jerry .tom .snout { display: block; width: 70px; height: 40px; background: #ecf0f1; border-radius: 40px 40px 20px 20px; border: 4px solid #2c3e50; bottom: 10px; left: 6px; z-index: 6; }
+.comic-universe-tom_jerry .tom .nose { display: block; width: 14px; height: 10px; background: #2c3e50; border-radius: 50%; top: 50px; left: 38px; z-index: 8; }
+.comic-universe-tom_jerry .tom .mouth { width: 30px; height: 10px; background: #e74c3c; border-radius: 0 0 15px 15px; bottom: 2px; }
+.comic-universe-tom_jerry .tom .body { background: #697d91; }
+/* Jerry */
+.comic-universe-tom_jerry .jerry .head { background: #a86b32; border-radius: 45px; width: 80px; height: 80px; left: 35px; top: 40px; }
+.comic-universe-tom_jerry .jerry .ear { display: block; width: 45px; height: 45px; background: #a86b32; border: 4px solid #2c3e50; border-radius: 50%; top: 15px; z-index: 4; box-shadow: inset 0 0 0 8px #e8a6b1; }
+.comic-universe-tom_jerry .jerry .ear.left { left: 10px; }
+.comic-universe-tom_jerry .jerry .ear.right { right: 10px; }
+.comic-universe-tom_jerry .jerry .snout { display: block; width: 50px; height: 30px; background: #dcb38a; border-radius: 30px; border: 3px solid #2c3e50; bottom: 5px; left: 12px; z-index: 6; }
+.comic-universe-tom_jerry .jerry .nose { display: block; width: 10px; height: 8px; background: #2c3e50; border-radius: 50%; top: 45px; left: 35px; z-index: 8; }
+.comic-universe-tom_jerry .jerry .body { background: #a86b32; width: 50px; left: 50px; }
+/* Spike */
+.comic-universe-tom_jerry .spike .head { background: #bda48c; width: 100px; height: 80px; border-radius: 40px 40px 10px 10px; left: 25px; top: 25px; }
+.comic-universe-tom_jerry .spike .ear { display: block; width: 30px; height: 45px; background: #9c8470; border: 4px solid #2c3e50; border-radius: 10px 10px 30px 30px; top: 10px; z-index: 6; }
+.comic-universe-tom_jerry .spike .ear.left { left: 10px; transform: rotate(15deg); }
+.comic-universe-tom_jerry .spike .ear.right { right: 10px; transform: rotate(-15deg); }
+.comic-universe-tom_jerry .spike .eye { width: 15px; height: 15px; border-radius: 50%; background: #fff; }
+.comic-universe-tom_jerry .spike .jowl { display: block; width: 110px; height: 50px; background: #e3d4c5; border: 4px solid #2c3e50; border-radius: 50px; bottom: -20px; left: -9px; z-index: 7; }
+.comic-universe-tom_jerry .spike .collar { display: block; width: 98px; height: 15px; background: #e74c3c; border: 4px solid #2c3e50; border-radius: 10px; top: -10px; left: -8px; z-index: 9; }
+.comic-universe-tom_jerry .spike .body { background: #bda48c; width: 90px; left: 30px; border-radius: 40px 40px 0 0; }
+/* Nibbles */
+.comic-universe-tom_jerry .nibbles .head { background: #b5bac1; border-radius: 45px; width: 70px; height: 70px; left: 40px; top: 50px; }
+.comic-universe-tom_jerry .nibbles .ear { display: block; width: 35px; height: 35px; background: #b5bac1; border: 3px solid #2c3e50; border-radius: 50%; top: 25px; z-index: 4; box-shadow: inset 0 0 0 6px #e8a6b1; }
+.comic-universe-tom_jerry .nibbles .ear.left { left: 20px; }
+.comic-universe-tom_jerry .nibbles .ear.right { right: 20px; }
+.comic-universe-tom_jerry .nibbles .body { background: #b5bac1; width: 40px; height: 40px; left: 55px; bottom: 10px; border-radius: 20px; }
+/* Backgrounds */
+.comic-universe-tom_jerry .bg-kitchen { background: #ecf0f1; background-image: repeating-linear-gradient(45deg, #bdc3c7 25%, transparent 25%, transparent 75%, #bdc3c7 75%, #bdc3c7), repeating-linear-gradient(45deg, #bdc3c7 25%, transparent 25%, transparent 75%, #bdc3c7 75%, #bdc3c7); background-size: 40px 40px; background-position: 0 0, 20px 20px; }
+.comic-universe-tom_jerry .bg-livingroom { background: #e8daef; border-bottom: 40px solid #8e44ad; }
+.comic-universe-tom_jerry .bg-yard { background: linear-gradient(to bottom, #87ceeb 60%, #2ecc71 40%); }
+.comic-universe-tom_jerry .bg-mousehole { background: #5c4033; overflow: hidden; }
+.comic-universe-tom_jerry .bg-mousehole::before { content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 180px; height: 200px; background: #000; border-radius: 90px 90px 0 0; z-index: 0; }
+/* Poses */
+.comic-universe-tom_jerry .pose-action .tj-hero { animation: tj-chase 0.3s ease-in-out infinite alternate; }
+@keyframes tj-chase { 0% { transform: translateX(-50%) skewX(-5deg); } 100% { transform: translateX(-50%) skewX(5deg); } }
+.comic-universe-tom_jerry .pose-thinking .tj-hero { animation: tj-scurry 3s infinite alternate; }
+.comic-universe-tom_jerry .pose-pointing .tj-hero { animation: tj-scurry 1.5s infinite alternate; }

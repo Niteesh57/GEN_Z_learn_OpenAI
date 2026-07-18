@@ -1,0 +1,100 @@
+/* Marvel Mashup CSS Bundle — extracted from test1.html */
+.comic-universe-marvel_mashup .comic-book-spread {
+  background-color: #fff; border: 4px solid #111; border-radius: 3px;
+  box-shadow: 10px 10px 0px #fff, 14px 14px 0px #111, 25px 25px 30px rgba(0,0,0,0.4);
+  transform: rotate(-1deg); font-family: 'Impact', sans-serif;
+}
+.comic-universe-marvel_mashup .comic-card {
+  padding: 20px; text-align: center; position: relative; box-sizing: border-box;
+  border: 4px solid #000; overflow: hidden; background: #f4f4f4; min-height: 320px;
+  display: flex; flex-direction: column; justify-content: flex-end;
+}
+.comic-universe-marvel_mashup .speech-bubble {
+  color: #111 !important;
+  position: absolute; top: 15px; left: 15px; background: #fff; border: 3px solid #000;
+  border-radius: 20px; padding: 10px 15px;
+  font-family: 'Comic Sans MS','Chalkboard SE',sans-serif; font-size: 14px;
+  font-weight: bold; z-index: 20; max-width: 60%; text-align: left; box-shadow: 3px 3px 0px #000;
+}
+.comic-universe-marvel_mashup .speech-bubble::after {
+  content: ''; position: absolute; bottom: -15px; right: 20px;
+  border-width: 15px 15px 0 0; border-style: solid; border-color: #fff transparent transparent transparent;
+}
+.comic-universe-marvel_mashup .speech-bubble::before {
+  content: ''; position: absolute; bottom: -19px; right: 18px;
+  border-width: 17px 17px 0 0; border-style: solid; border-color: #000 transparent transparent transparent; z-index: -1;
+}
+.comic-universe-marvel_mashup .action-text {
+  background: #ef233c; color: #fff; padding: 5px 15px; font-size: 1.5rem; letter-spacing: 2px;
+  border: 4px solid #000; display: inline-block; transform: rotate(-5deg); box-shadow: 4px 4px 0px #000;
+  position: absolute; bottom: 20px; right: 15px; z-index: 5; font-family: 'Impact', sans-serif;
+}
+/* Hero base */
+.comic-universe-marvel_mashup .mashup-hero {
+  width: 220px; height: 260px; margin: 0 auto; position: absolute;
+  bottom: 10px; left: 50%; transform: translateX(-50%);
+}
+.comic-universe-marvel_mashup .mashup-hero > div { position: absolute; }
+.comic-universe-marvel_mashup .feature {
+  position: absolute; z-index: 2; width: 0; height: 0; top: -10px;
+}
+.comic-universe-marvel_mashup .head {
+  width: 140px; height: 160px; border: 5px solid #000; position: absolute;
+  left: 40px; top: 40px; z-index: 3; overflow: hidden;
+}
+.comic-universe-marvel_mashup .eyes { position: absolute; display: flex; gap: 10px; }
+.comic-universe-marvel_mashup .eye { border: 5px solid #000; background: #fff; }
+.comic-universe-marvel_mashup .mouth { position: absolute; background: #000; border-radius: 3px; }
+.comic-universe-marvel_mashup .body {
+  width: 90px; height: 70px; border: 5px solid #000; border-radius: 20px 20px 0 0;
+  position: absolute; bottom: 0; left: 65px; z-index: 1;
+}
+/* Bat-Spider */
+.comic-universe-marvel_mashup .bat-spider .feature { border-left: 15px solid transparent; border-right: 25px solid transparent; border-bottom: 50px solid #000; }
+.comic-universe-marvel_mashup .bat-spider .feature.left { left: 42px; transform: rotate(-15deg); }
+.comic-universe-marvel_mashup .bat-spider .feature.right { right: 42px; transform: scaleX(-1) rotate(-15deg); }
+.comic-universe-marvel_mashup .bat-spider .head { background: #d90429; border-radius: 70px 70px 60px 60px; background-image: radial-gradient(circle at 70px 80px, transparent 20px, #000 21px, transparent 22px, transparent 40px, #000 41px, transparent 42px), linear-gradient(0deg, transparent 49%, #000 50%, #000 52%, transparent 53%), linear-gradient(90deg, transparent 49%, #000 50%, #000 52%, transparent 53%); }
+.comic-universe-marvel_mashup .bat-spider .eyes { top: 45px; left: 10px; }
+.comic-universe-marvel_mashup .bat-spider .eye { width: 55px; height: 55px; border-radius: 100% 0% 100% 0%; transform: rotate(-45deg); box-shadow: -3px 3px 0px rgba(0,0,0,0.2); }
+.comic-universe-marvel_mashup .bat-spider .eye.right { transform: scaleX(-1) rotate(-45deg); }
+.comic-universe-marvel_mashup .bat-spider .mouth { width: 40px; height: 6px; bottom: 30px; left: 50px; }
+.comic-universe-marvel_mashup .bat-spider .body { background: #2b2d42; }
+/* Iron-Bat */
+.comic-universe-marvel_mashup .iron-bat .feature { border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 30px solid #d90429; top: 15px; }
+.comic-universe-marvel_mashup .iron-bat .feature.left { left: 25px; transform: rotate(-30deg); }
+.comic-universe-marvel_mashup .iron-bat .feature.right { right: 25px; transform: scaleX(-1) rotate(-30deg); }
+.comic-universe-marvel_mashup .iron-bat .head { background: #ffc107; border-color: #d90429; border-width: 8px; border-radius: 30px 30px 50px 50px; }
+.comic-universe-marvel_mashup .iron-bat .eyes { top: 60px; left: 15px; gap: 20px; }
+.comic-universe-marvel_mashup .iron-bat .eye { width: 40px; height: 15px; background: #00ffff; border-radius: 0; border: 3px solid #000; box-shadow: 0 0 10px #00ffff; }
+.comic-universe-marvel_mashup .iron-bat .mouth { width: 60px; height: 5px; bottom: 35px; left: 35px; background: #000; }
+.comic-universe-marvel_mashup .iron-bat .body { background: #d90429; }
+/* Smash-Dash */
+.comic-universe-marvel_mashup .smash-dash .feature { border-left: 15px solid transparent; border-right: 0px solid transparent; border-bottom: 40px solid #ffeb3b; top: 30px; z-index: 4; }
+.comic-universe-marvel_mashup .smash-dash .feature.left { left: 25px; transform: rotate(-70deg); }
+.comic-universe-marvel_mashup .smash-dash .feature.right { right: 25px; transform: scaleX(-1) rotate(-70deg); }
+.comic-universe-marvel_mashup .smash-dash .head { background: #4caf50; border-radius: 20px 20px 40px 40px; width: 160px; left: 30px; }
+.comic-universe-marvel_mashup .smash-dash .eyes { top: 50px; left: 20px; gap: 10px; }
+.comic-universe-marvel_mashup .smash-dash .eye { width: 50px; height: 25px; background: #fff; border-radius: 0 0 20px 20px; transform: rotate(15deg); }
+.comic-universe-marvel_mashup .smash-dash .eye.right { transform: scaleX(-1) rotate(15deg); }
+.comic-universe-marvel_mashup .smash-dash .mouth { width: 80px; height: 20px; bottom: 20px; left: 35px; background: #fff; border: 4px solid #000; border-radius: 10px; }
+.comic-universe-marvel_mashup .smash-dash .body { background: #ffeb3b; width: 120px; left: 50px; }
+/* Skull-Claw */
+.comic-universe-marvel_mashup .skull-claw .feature { border-left: 20px solid transparent; border-right: 50px solid transparent; border-bottom: 90px solid #000; top: -20px; }
+.comic-universe-marvel_mashup .skull-claw .feature.left { left: 10px; transform: rotate(-25deg); }
+.comic-universe-marvel_mashup .skull-claw .feature.right { right: 10px; transform: scaleX(-1) rotate(-25deg); }
+.comic-universe-marvel_mashup .skull-claw .head { background: #fff; border-radius: 50% 50% 40% 40%; }
+.comic-universe-marvel_mashup .skull-claw .eyes { top: 60px; left: 20px; gap: 15px; }
+.comic-universe-marvel_mashup .skull-claw .eye { width: 35px; height: 45px; background: #ff0000; border-radius: 50%; box-shadow: inset 0 0 10px #000; }
+.comic-universe-marvel_mashup .skull-claw .mouth { width: 10px; height: 25px; bottom: 20px; left: 60px; background: transparent; border-left: 4px solid #000; border-right: 4px solid #000; box-shadow: -15px 0 0 #000, 15px 0 0 #000; }
+.comic-universe-marvel_mashup .skull-claw .body { background: #111; }
+/* Backgrounds */
+.comic-universe-marvel_mashup .bg-1 { background: #f4f4f4; box-shadow: inset 0 0 30px #ccc; }
+.comic-universe-marvel_mashup .bg-2 { background: #ffeb3b; background-image: radial-gradient(#ff5722 15%, transparent 16%); background-size: 10px 10px; }
+.comic-universe-marvel_mashup .bg-3 { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); }
+.comic-universe-marvel_mashup .bg-4 { background: #111; box-shadow: inset 0 0 40px #555; border-color: #555; }
+/* Poses */
+.comic-universe-marvel_mashup .pose-action .mashup-hero { animation: marvel-action 0.4s ease-in-out infinite alternate; }
+@keyframes marvel-action { 0% { transform: translateX(-50%) scale(1); } 100% { transform: translateX(-50%) scale(1.05) rotate(3deg); } }
+.comic-universe-marvel_mashup .pose-thinking .mashup-hero { animation: marvel-think 2s ease-in-out infinite; }
+@keyframes marvel-think { 0%,100% { transform: translateX(-50%); } 50% { transform: translateX(-50%) rotate(-3deg); } }
+.comic-universe-marvel_mashup .pose-pointing .mashup-hero { animation: none; }

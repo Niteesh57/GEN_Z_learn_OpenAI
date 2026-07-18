@@ -1,0 +1,109 @@
+/* Disney Classic CSS Bundle — extracted from test4.html */
+.comic-universe-disney .comic-book-spread {
+  background-color: #fff; border: 6px solid #111; border-radius: 10px;
+  box-shadow: 10px 10px 0px #ffcc00, 14px 14px 0px #111, 25px 25px 30px rgba(0,0,0,0.5);
+  transform: rotate(-1deg); font-family: 'Comic Sans MS','Chalkboard SE',sans-serif;
+}
+.comic-universe-disney .comic-card {
+  padding: 20px; text-align: center; position: relative; box-sizing: border-box;
+  border: 5px solid #000; border-radius: 15px; overflow: hidden; min-height: 320px;
+  display: flex; flex-direction: column; justify-content: flex-end; box-shadow: 4px 4px 0px rgba(0,0,0,0.2);
+}
+.comic-universe-disney .speech-bubble {
+  color: #111 !important;
+  position: absolute; top: 15px; left: 15px; background: #fff; border: 3px solid #000;
+  border-radius: 20px; padding: 10px 15px; font-size: 14px; font-weight: bold;
+  z-index: 20; max-width: 60%; text-align: left; box-shadow: 3px 3px 0px #000;
+}
+.comic-universe-disney .speech-bubble::after {
+  content: ''; position: absolute; bottom: -15px; right: 20px;
+  border-width: 15px 15px 0 0; border-style: solid; border-color: #fff transparent transparent transparent;
+}
+.comic-universe-disney .speech-bubble::before {
+  content: ''; position: absolute; bottom: -19px; right: 18px;
+  border-width: 17px 17px 0 0; border-style: solid; border-color: #000 transparent transparent transparent; z-index: -1;
+}
+.comic-universe-disney .action-text {
+  background: #ffcc00; color: #000; padding: 5px 15px; font-size: 1.5rem;
+  font-family: 'Impact', sans-serif; letter-spacing: 2px; border: 4px solid #000;
+  border-radius: 10px; display: inline-block; transform: rotate(-8deg); box-shadow: 4px 4px 0px #000;
+  position: absolute; bottom: 20px; right: 15px; z-index: 25;
+}
+/* Hero */
+.comic-universe-disney .disney-hero {
+  position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
+  width: 160px; height: 180px; animation: disney-bounce 2s ease-in-out infinite;
+}
+@keyframes disney-bounce {
+  0%,100% { transform: translate(-50%, 0px) scaleY(1); }
+  50% { transform: translate(-50%, -6px) scaleY(1.02); }
+}
+.comic-universe-disney .disney-hero > div { position: absolute; }
+.comic-universe-disney .disney-hero .ear,
+.comic-universe-disney .disney-hero .hat,
+.comic-universe-disney .disney-hero .bow,
+.comic-universe-disney .disney-hero .beak,
+.comic-universe-disney .disney-hero .snout { display: none; }
+.comic-universe-disney .head {
+  width: 90px; height: 90px; border: 5px solid #000; border-radius: 50%;
+  left: 30px; top: 30px; z-index: 5;
+}
+.comic-universe-disney .eyes {
+  top: 25px; width: 100%; display: flex; justify-content: center; gap: 8px; z-index: 6;
+}
+.comic-universe-disney .eye {
+  width: 14px; height: 25px; background: #000; border-radius: 50%; position: relative; overflow: hidden;
+}
+.comic-universe-disney .eye::after {
+  content: ''; position: absolute; bottom: 0; right: 2px; width: 6px; height: 6px;
+  background: #fff; border-radius: 50%;
+}
+.comic-universe-disney .mouth {
+  bottom: 15px; left: 50%; transform: translateX(-50%); border: 3px solid #000; z-index: 6;
+}
+.comic-universe-disney .body {
+  width: 70px; height: 50px; border: 5px solid #000; border-radius: 30px 30px 10px 10px;
+  bottom: 0; left: 40px; z-index: 2;
+}
+/* Mickey */
+.comic-universe-disney .mickey .ear { display: block; width: 50px; height: 50px; background: #000; border-radius: 50%; top: 5px; z-index: 4; }
+.comic-universe-disney .mickey .ear.left { left: 15px; }
+.comic-universe-disney .mickey .ear.right { right: 15px; }
+.comic-universe-disney .mickey .head { background: #000; border: none; }
+.comic-universe-disney .mickey .snout { display: block; width: 80px; height: 70px; background: #ffcc99; border-radius: 50% 50% 40% 40%; top: 15px; left: 5px; z-index: 5; }
+.comic-universe-disney .mickey .beak { display: block; width: 20px; height: 12px; background: #000; border-radius: 50%; top: 55px; left: 35px; z-index: 7; }
+.comic-universe-disney .mickey .mouth { width: 40px; height: 15px; background: #000; border-radius: 0 0 20px 20px; bottom: 5px; border: none; }
+.comic-universe-disney .mickey .body { background: #e60000; }
+/* Minnie */
+.comic-universe-disney .minnie .ear { display: block; width: 50px; height: 50px; background: #000; border-radius: 50%; top: 5px; z-index: 4; }
+.comic-universe-disney .minnie .ear.left { left: 15px; }
+.comic-universe-disney .minnie .ear.right { right: 15px; }
+.comic-universe-disney .minnie .head { background: #000; border: none; }
+.comic-universe-disney .minnie .snout { display: block; width: 80px; height: 70px; background: #ffcc99; border-radius: 50% 50% 40% 40%; top: 15px; left: 5px; z-index: 5; }
+.comic-universe-disney .minnie .bow { display: block; width: 0; height: 0; border-left: 20px solid #e60000; border-right: 20px solid #e60000; border-top: 15px solid transparent; border-bottom: 15px solid transparent; top: -5px; left: 25px; z-index: 8; }
+.comic-universe-disney .minnie .body { background: #e60000; background-image: radial-gradient(#fff 20%, transparent 21%); background-size: 15px 15px; }
+/* Donald */
+.comic-universe-disney .donald .head { background: #fff; border-radius: 50% 50% 40% 40%; }
+.comic-universe-disney .donald .hat { display: block; width: 50px; height: 20px; background: #0066cc; border: 4px solid #000; border-radius: 50%; top: 15px; left: 16px; z-index: 8; transform: rotate(-10deg); }
+.comic-universe-disney .donald .beak { display: block; width: 60px; height: 30px; background: #ffcc00; border: 4px solid #000; border-radius: 30px; top: 60px; left: 11px; z-index: 7; }
+.comic-universe-disney .donald .body { background: #0066cc; }
+/* Goofy */
+.comic-universe-disney .goofy .head { background: #ffcc99; width: 70px; height: 100px; border-radius: 35px 35px 20px 20px; left: 40px; top: 15px; }
+.comic-universe-disney .goofy .ear { display: block; width: 20px; height: 60px; background: #000; border-radius: 10px; top: 40px; z-index: 4; }
+.comic-universe-disney .goofy .ear.left { left: 25px; transform: rotate(15deg); }
+.comic-universe-disney .goofy .ear.right { right: 25px; transform: rotate(-15deg); }
+.comic-universe-disney .goofy .hat { display: block; width: 30px; height: 40px; background: #33cc33; border: 4px solid #000; border-radius: 10px 10px 0 0; top: -20px; left: 55px; z-index: 8; }
+.comic-universe-disney .goofy .snout { display: block; width: 80px; height: 45px; background: #ffcc99; border: 5px solid #000; border-radius: 40px; top: 75px; left: 30px; z-index: 7; }
+.comic-universe-disney .goofy .body { background: #ff9900; }
+/* Backgrounds */
+.comic-universe-disney .bg-toontown { background: #66ccff; overflow: hidden; }
+.comic-universe-disney .bg-toontown::after { content: ''; position: absolute; bottom: -20px; left: -20%; width: 140%; height: 100px; background: #33cc33; border-radius: 50% 50% 0 0; border-top: 4px solid #000; z-index: 0; }
+.comic-universe-disney .bg-steamboat { background: #d9d9d9; box-shadow: inset 0 0 40px #888; filter: grayscale(100%); }
+.comic-universe-disney .bg-clubhouse { background: radial-gradient(circle, #ffcc00, #e60000); }
+.comic-universe-disney .bg-magic { background: linear-gradient(to bottom, #4a0072, #0066cc); background-image: radial-gradient(#fff 5%, transparent 6%); background-size: 40px 40px; }
+/* Poses */
+.comic-universe-disney .pose-action .disney-hero { animation: disney-spin 1s ease-in-out infinite; }
+@keyframes disney-spin { 0%,100% { transform: translateX(-50%) rotate(-5deg); } 50% { transform: translateX(-50%) rotate(5deg); } }
+.comic-universe-disney .pose-thinking .disney-hero { animation: disney-think 3s ease-in-out infinite; }
+@keyframes disney-think { 0%,100% { transform: translateX(-50%) scale(1); } 50% { transform: translateX(-50%) scale(0.95); } }
+.comic-universe-disney .pose-pointing .disney-hero { animation: disney-bounce 2s ease-in-out infinite; }
