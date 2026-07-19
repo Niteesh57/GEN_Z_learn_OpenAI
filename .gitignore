@@ -45,3 +45,6 @@ frontend/.env
 # OS files
 .DS_Store
 Thumbs.db
+DEVPOST.md
+test.py
+output

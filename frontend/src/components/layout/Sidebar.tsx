@@ -16,7 +16,7 @@ const CONCEPTS = [
   { id: 'GAME', label: 'Gaming', icon: 'sports_esports' },
   { id: 'COMIC', label: 'Comics', icon: 'auto_stories' },
   { id: 'BROWSER', label: 'Browser', icon: 'web' },
-  { id: 'MEME', label: 'Meme', icon: 'sentiment_very_satisfied' },
+  { id: 'GIF_LEARNING', label: 'GIF Learning', icon: 'gif_box' },
 ];
 
 export const Sidebar: React.FC<SidebarProps> = ({

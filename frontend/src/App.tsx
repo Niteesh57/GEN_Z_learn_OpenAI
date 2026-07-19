@@ -7,7 +7,7 @@ import ChatInput from './components/chat/ChatInput';
 import ComicRenderer from './components/renderers/ComicRenderer';
 import BrowserRenderer from './components/renderers/BrowserRenderer';
 import GameRenderer from './components/renderers/GameRenderer';
-import MemeRenderer from './components/renderers/MemeRenderer';
+import GiphyLearningRenderer from './components/renderers/GiphyLearningRenderer';
 import ReelsRenderer from './components/renderers/ReelsRenderer';
 import IntroScreen from './components/ui/IntroScreen';
 
@@ -60,11 +60,11 @@ const MODE_SHOWCASE = [
   { id: 'comics', icon: 'auto_stories', label: 'COMICS', caption: 'visual stories' },
   { id: 'games', icon: 'sports_esports', label: 'GAMES', caption: 'learn by play' },
   { id: 'browser', icon: 'web', label: 'BROWSER', caption: 'guided clicks' },
-  { id: 'memes', icon: 'sentiment_very_satisfied', label: 'MEMES', caption: 'quick laughs' },
+  { id: 'gifs', icon: 'gif_box', label: 'GIFS', caption: 'visual cues' },
 ];
 
 function ModeShowcase() {
-  return <div className="mode-showcase" aria-label="Learning modes: Reels, Comics, Games, Browser, and Memes">
+  return <div className="mode-showcase" aria-label="Learning modes: Reels, Comics, Games, Browser, and GIF Learning">
     <div className="mode-showcase-stage">
       <div className="mode-showcase-ring" />
       <div className="mode-showcase-core"><span className="material-symbols-outlined">bolt</span><small>EXPLORE</small></div>
@@ -145,7 +145,7 @@ function App() {
       case 'COMIC': return <ComicRenderer data={{ ...data, concept: interaction.concept }} />;
       case 'BROWSER': return <BrowserRenderer data={data} />;
       case 'GAME': return <GameRenderer data={data} />;
-      case 'MEME': return <MemeRenderer data={data} />;
+      case 'GIF_LEARNING': return <GiphyLearningRenderer data={data} />;
       case 'REELS': return <ReelsRenderer data={data} />;
       default: return <div className="p-6 text-red-700">This learning format is unavailable.</div>;
     }

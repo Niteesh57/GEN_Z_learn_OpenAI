@@ -11,7 +11,7 @@ export const WelcomeScreen: React.FC = () => {
         {isDone ? <span className="cursor-blink"></span> : <span className="cursor-blink"></span>}
       </h2>
       <p className="font-body-sm text-body-sm text-on-surface-variant max-w-md mx-auto text-flicker">
-        No Over Text Context ... Interact with Context ... Ask me anything.
+        Learning shouldn't adapt to the teacher. It should adapt to the learner.
       </p>
     </div>
   );

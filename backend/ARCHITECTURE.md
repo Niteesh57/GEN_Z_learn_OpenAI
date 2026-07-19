@@ -1,32 +1,163 @@
-# KnowledgeForge Backend: Architecture & Techniques
+# The way Gen_Z learn's — backend architecture
 
-This document outlines the core technical methodologies, design patterns, and AI architectures implemented in the KnowledgeForge backend.
+This document describes the backend as it is implemented today. Its job is to turn a topic into a safe, renderer-ready learning experience—not to generate browser code or execute user commands.
 
-## 1. Asynchronous ASGI Execution
-The core server is built on **FastAPI**, fully utilizing Python's `asyncio` event loop. All API endpoints, database queries, and LLM network requests are implemented using `async/await`. This guarantees high throughput and prevents blocking I/O during concurrent generation requests.
+## Request lifecycle
 
-## 2. Foundry IQ: Stateful Multi-Agent Orchestration
-At the heart of the backend is the **Foundry IQ** semantic router, powered by **LangGraph** and **LangChain**:
-*   **Stateful Graph:** A centralized `AgentState` schema tracks the concept, medium, routing decisions, and context.
-*   **Format-Aware Routing:** The orchestrator node intercepts the user's concept and dynamically routes the execution flow to the correct specialized agent (e.g., `codebook_agent.py`, `comic_agent.py`, `meme_agent.py`, `game_agent.py`).
+```mermaid
+sequenceDiagram
+    participant UI as React client
+    participant API as FastAPI
+    participant Agent as Mode agent / LangGraph
+    participant LLM as Groq LLM
+    participant Render as Fixed React renderer
 
-## 3. High-Speed Inference (Groq & Llama)
-The backend utilizes the **Groq API** to perform lightning-fast inference using Llama architectures (e.g., `meta-llama/llama-4-scout-17b-16e-instruct`). This speed allows the LangGraph state machine to perform multi-step verifications and generation loops in sub-second timelines.
+    UI->>API: POST /generate (concept, active_folder, template)
+    API->>Agent: build AgentState
+    Agent->>LLM: request structured lesson data
+    LLM-->>Agent: JSON-shaped response
+    Agent->>Agent: validate, repair, or use fallback
+    Agent-->>API: medium, template, title, description, content
+    API-->>UI: Experience payload
+    UI->>Render: choose trusted mode renderer
+```
 
-## 4. Multi-Modal Vision Processing
-To generate highly accurate narratives for visual mediums (like Memes), the backend integrates **Vision AI**. The meme agent dynamically queries the Groq Vision API, passing the image URL to extract visual descriptions. This visual context is injected directly into the LLM prompt, ensuring the generated story perfectly matches the image.
+`backend/main.py` receives a `GenerateRequest` with four useful fields:
 
-## 5. Hybrid RAG & Query Cascades
-Data structures like the Comic Storyboard Canvases and Meme templates are queried via a **Hybrid RAG approach**:
-*   **Azure AI Search / In-Memory Store:** Employs vector lookups combined with exact metadata filtering.
-*   **Multi-Tier Cascading Fallbacks:** If a specific constraint (e.g., character + background + pose) fails to find a match, the query engine automatically relaxes constraints iteratively until an asset is found, guaranteeing 100% system availability.
+| Field | Meaning |
+| --- | --- |
+| `concept` | The topic to teach. |
+| `active_folder` | The selected sidebar mode. |
+| `medium` | A compatibility copy of the selected mode. |
+| `template` | A user-selected template, currently used for game selection. |
 
-## 6. Robust Structured Outputs (JSON Constraints)
-Rather than relying on fragile regex string cleaning, the backend enforces **strict structured output constraints** (JSON mode) coupled with **Pydantic validation schemas**. LLM outputs are processed using resilient partial decoders, ensuring that truncated delimiters or unescaped newlines do not crash the React frontend.
+The response always uses the same high-level shape:
 
-## 7. Zero-RCE Security Sandboxing
-To simulate interactive environments like terminals and browser consoles, the backend utilizes an abstract **Data-Renderer Pattern**. The AI does *not* execute code, nor does it return HTML/CSS. It generates abstract, strongly-typed JSON trees representing the safe *expected output state* of a terminal command. This completely eliminates Remote Code Execution (RCE) vectors while providing a fully immersive simulation.
+```json
+{
+  "medium": "GAME | COMIC | BROWSER | GIF_LEARNING | REELS",
+  "template": "renderer-specific identifier",
+  "title": "lesson title",
+  "description": "short lesson description",
+  "content": {}
+}
+```
 
-## 8. Warm Indexing & Static Serving
-*   **Pre-Warming:** During the FastAPI `@app.on_event("startup")` lifecycle, the backend pre-loads and indexes datasets (memes and canvases) into memory to eliminate runtime lag.
-*   **Unified Serving:** Utilizing Starlette's `StaticFiles`, the compiled React production bundle is served directly from the Python memory space, minimizing deployment complexity to a single unified Docker container.
+The TypeScript representation is maintained in `frontend/src/types/chat.ts`.
+
+## Routing
+
+`generate_experience` uses explicit routing when a learner has already selected a mode:
+
+| Selected mode | Backend path |
+| --- | --- |
+| `REELS` | `app.agents.reels_agent.generate_reels` |
+| `COMIC` | `app.agents.comic_agent.generate_comic` |
+| `GIF_LEARNING` | `app.agents.giphy_agent.generate_giphy_learning` |
+| `GAME` / `BROWSER` | LangGraph workflow |
+
+The LangGraph workflow has three nodes: `route_experience`, `GAME`, and `BROWSER` (with `COMIC` available as a routed fallback). The orchestration agent selects the most appropriate graph node when a mode is not explicitly pinned.
+
+## Mode agents
+
+### Reels agent
+
+`app/agents/reels_agent.py` owns the Reels contract.
+
+- Generates exactly 30 sequential lessons.
+- Requires `step`, `title`, `hook`, `body`, `takeaway`, and `voiceover` on every Reel.
+- Enforces step numbers 1–30 with no gaps.
+- Limits field lengths so text fits compact visual cards.
+- Rejects duplicate titles and duplicate narration.
+- Falls back to an ordered 30-step lesson if generation or JSON parsing fails.
+
+The React Reels renderer owns all visual variation: 30 CSS templates, randomized order, active-card animation effects, browser narration, and scroll navigation. The agent never produces CSS or animation names.
+
+### Game agent
+
+`app/agents/game_agent.py` supports:
+
+```text
+CATCH_DROP, WORD_DECODE, MAZE_ESCAPE, MEMORY_FLIP,
+SEQUENCE_SORT, BINARY_JUMP, SPACE_SHOOTER, CIRCUIT_CONNECT
+```
+
+The agent validates both common and template-specific gameplay constraints. Examples include contiguous sequence orders, unique memory terms, explicit boolean values, correct and decoy paths, and unique circuit links. Invalid LLM output receives a corrective retry. If that fails, a playable template-specific fallback is returned.
+
+The frontend repeats defensive normalization in `games/gameData.ts`. This defense-in-depth design is intentional: the server guards newly generated data, while the client also protects old saved sessions and malformed network payloads.
+
+### Comic agent
+
+`app/agents/comic_agent.py` requests a concise panel screenplay using an approved character roster, background, and pose. It sanitizes/parses the response, retrieves a matching local canvas from the in-memory canvas library, then injects text into the fixed canvas structure. The renderer later chooses the matching comic CSS bundle and may request up to four pages through `/generate-comic-page`.
+
+### Browser agent
+
+`app/agents/browser_agent.py` produces a browser walkthrough schema: screens, fields, acceptable choices, and next-button labels. The client renders it as a simulated macOS-style workspace. This is a learning environment only; the backend does not automate a real browser, execute commands, or modify a cloud service.
+
+### GIPHY agent
+
+`app/agents/giphy_agent.py` searches the first GIPHY Sticker Search page with the learner's original topic plus meaningful topic keywords and a family-friendly rating. It randomly selects from those topic results and never uses generic trending content as a fallback. It then asks the LLM for a guide-led sequence of text and GIF references. Validation requires Alex to introduce and explain every visual cue, uses every selected GIF once, and prevents duplicate or unknown references. The React renderer owns the narrator, progressive story display, and the visual treatment.
+
+## Reliability model
+
+### 1. Content is data; UI is code
+
+Agents return fields that an existing renderer understands. They do not return React components, CSS, scripts, or executable terminal commands. This protects the visual system from prompt output and makes rendering predictable.
+
+### 2. Validate before render
+
+The strongest validation is implemented where data is most specialized:
+
+| Content | Server checks | Client checks |
+| --- | --- | --- |
+| Reels | Exact count, order, required text, uniqueness | Typed display and safe empty state |
+| Games | Playability rules per template, retry, fallback | De-duplication, clamps, type checks, item bounds |
+| Comics | JSON cleanup, canvas lookup fallback | Safe panel/page handling |
+| Browser | Renderer-ready screen shape | Form state and required choice feedback |
+
+### 3. Fallbacks keep lessons usable
+
+If an LLM request, JSON parse, or specialized validation fails, the mode returns a minimal structured lesson instead of propagating a backend exception to the learner. Fallbacks are deliberately template-compatible so they pass through the same renderer path as normal responses.
+
+### 4. Bounded output controls performance
+
+Field length limits, fixed Reel count, bounded game level and item counts, and fixed comic page limits prevent oversized responses from creating slow or unusable screens. FastAPI handlers and LangChain Groq calls are asynchronous so independent requests do not block the ASGI event loop during network waiting.
+
+## Data stores and startup
+
+At FastAPI startup, `main.py` loads the local comic canvas collection into memory. GIPHY content is fetched only when a GIF Learning request is made. The application can serve a built frontend from `frontend/dist` using Starlette `StaticFiles`, which supports a single-service local or container deployment.
+
+## Extending safely
+
+When adding a new template or mode, update the complete contract rather than only the prompt.
+
+### New game template
+
+1. Add the identifier to the TypeScript union and backend template set.
+2. Define generator instructions, validation rules, and a safe fallback.
+3. Normalize the returned data in `gameData.ts`.
+4. Add a renderer and connect it in `GameRenderer.tsx`.
+5. Add the selector UI and visual theme.
+
+### New Reel template or motion style
+
+1. Add a CSS template selector in `frontend/src/index.css`.
+2. Keep `TEMPLATE_IDS` synchronized with the visual template count.
+3. Add a reusable effect to `TEXT_EFFECTS` only when needed.
+4. Keep the active-card trigger and `prefers-reduced-motion` behavior intact.
+
+### New learning mode
+
+1. Add a sidebar mode ID and an `Experience.medium` union member.
+2. Define a backend agent that returns a stable content shape.
+3. Route it in `generate_experience` or the LangGraph workflow.
+4. Build a dedicated renderer and register it in `App.tsx`.
+5. Add validation and a safe fallback before considering the mode complete.
+
+## Operational notes
+
+- Required environment variable: `GROQ_API_KEY`. GIF Learning also requires `GIPHY_API_KEY`.
+- `POST /generate` is the primary generation endpoint.
+- `POST /generate-comic-page` continues an existing comic story.
+- `GET /comic-clusters` returns the available universe metadata.
+- During frontend development, Vite talks to FastAPI on port 8000. In production-style use, build the frontend and FastAPI serves `frontend/dist` itself.

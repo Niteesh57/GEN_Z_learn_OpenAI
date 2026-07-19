@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import gameDemo from '../../assets/help/game_demo.mp4';
 import comicDemo from '../../assets/help/comic_demo.mp4';
 import browserDemo from '../../assets/help/browser_demo.mp4';
-import memeDemo from '../../assets/help/meme_demo.mp4';
 
 interface HelpModalProps {
   isOpen: boolean;
@@ -52,17 +51,17 @@ const HELP_CATEGORIES = [
       'Read the content to extract necessary clues or knowledge.'
     ]
   },
-  { 
-    id: 'MEME', 
-    label: 'Meme Explainer', 
-    icon: 'sentiment_very_satisfied',
-    title: 'Decoding Memes',
-    description: 'Breaks down complex topics using internet culture, pairing relatable images with deep explanations.',
-    mediaInstruction: 'User Action: Please take a screenshot of a generated Meme and its associated explanation text. Save as src/assets/help/meme_demo.png.',
+  {
+    id: 'GIF_LEARNING',
+    label: 'GIF Learning',
+    icon: 'gif_box',
+    title: 'Learning with GIFs',
+    description: 'Alex explains your topic and uses GIPHY animations as visual cues inside the story.',
+    mediaInstruction: 'GIF Learning loads live GIPHY results when a GIPHY_API_KEY is configured in the backend.',
     steps: [
-      'Look at the generated meme image to grasp the analogy.',
-      'Read the explanation below to understand how the meme connects to the core concept.',
-      'Use the humor and visual association to better remember the topic.'
+      'Enter a clear, visual topic or phrase.',
+      'Watch the three or more GIFs returned for that topic.',
+      'Use each animation as a visual memory cue while reviewing the lesson.'
     ]
   }
 ];
@@ -71,7 +70,6 @@ const VIDEO_SOURCES: Record<string, string> = {
   GAME: gameDemo,
   COMIC: comicDemo,
   BROWSER: browserDemo,
-  MEME: memeDemo,
 };
 
 const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
@@ -91,7 +89,7 @@ const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
         <div className="bg-surface-container-highest px-4 py-3 border-b border-[#2a2a2a] flex justify-between items-center bevel-raised shrink-0">
           <div className="flex items-center gap-2 text-primary-fixed-dim font-bold font-label-caps text-[14px]">
             <span className="material-symbols-outlined text-[18px]">help_center</span>
-            KNOWLEDGE_FORGE // HELP_MANUAL_V1.0
+            THE_WAY_GEN_Z_LEARN'S // HELP_MANUAL_V1.0
           </div>
           <button
             onClick={onClose}

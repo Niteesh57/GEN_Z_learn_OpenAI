@@ -12,12 +12,18 @@ headers = {
     "api-key": AZURE_SEARCH_KEY
 }
 
+COMIC_CLUSTERS = (
+    "dc_justice", "marvel_mashup", "disney", "tom_jerry",
+    "kick_buttowski", "stranger_things", "ben10", "glitch_rider",
+)
+ALL_COMIC_CLUSTERS_FILTER = " or ".join(f"cluster eq '{cluster}'" for cluster in COMIC_CLUSTERS)
+
 def ingest_canvases(canvases: list):
     """Ingest canvases into Azure Cognitive Search knowledge-forge-index if not already present."""
     # Check if canvases are already in the index
     check_url = f"{AZURE_SEARCH_ENDPOINT.rstrip('/')}/indexes/{AZURE_SEARCH_INDEX}/docs/search?api-version=2023-11-01"
     check_payload = {
-        "filter": "cluster ne 'meme'",
+        "filter": ALL_COMIC_CLUSTERS_FILTER,
         "top": 1,
         "select": "id"
     }
@@ -160,5 +166,5 @@ def query_canvas(
         return matches
 
     # 6. Absolute fallback (across any cluster)
-    matches = execute_search("*", "cluster ne 'meme'", n_results)
+    matches = execute_search("*", ALL_COMIC_CLUSTERS_FILTER, n_results)
     return matches

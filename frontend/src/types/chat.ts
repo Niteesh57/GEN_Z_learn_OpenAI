@@ -96,7 +96,7 @@ export interface GameLevel {
 // ─── Core Experience Types ────────────────────────────────────────────────────
 
 export interface Experience {
-  medium: 'COMIC' | 'BROWSER' | 'GAME' | 'MEME' | 'REELS';
+  medium: 'COMIC' | 'BROWSER' | 'GAME' | 'GIF_LEARNING' | 'REELS';
   template: string;
   title: string;
   description: string;
@@ -117,6 +117,11 @@ export interface Experience {
     title?: string;
     concept?: string;
     reels?: ReelStep[];
+    // GIF Learning
+    gifs?: GiphyGif[];
+    guide?: GiphyGuide;
+    blocks?: GiphyLessonBlock[];
+    message?: string;
   };
 }
 
@@ -127,6 +132,26 @@ export interface ReelStep {
   body: string;
   takeaway: string;
   voiceover: string;
+}
+
+export interface GiphyGif {
+  id: string;
+  title: string;
+  alt_text: string;
+  image_url: string;
+  source_url: string;
+  creator: string;
+}
+
+export interface GiphyGuide {
+  name: string;
+  role: string;
+}
+
+export interface GiphyLessonBlock {
+  type: 'text' | 'gif';
+  content?: string;
+  gif_id?: string;
 }
 
 export interface ChatInteraction {

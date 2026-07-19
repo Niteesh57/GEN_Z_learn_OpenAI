@@ -9,7 +9,7 @@ from typing import Optional, Dict, Any, List
 
 load_dotenv()
 
-app = FastAPI(title="KnowledgeForge API")
+app = FastAPI(title="The way Gen_Z learn's API")
 
 @app.on_event("startup")
 async def startup_event():
@@ -20,10 +20,6 @@ async def startup_event():
         ingest_canvases(ALL_CANVASES)
         print("[Startup] Loaded comic canvases.")
         
-        # Load Memes
-        from app.db.meme_db import load_memes
-        load_memes()
-        print("[Startup] Loaded meme database.")
     except Exception as e:
         print(f"Error during startup indexing: {e}")
 
@@ -57,9 +53,9 @@ async def generate_experience(request: GenerateRequest):
     if folder == "COMIC":
         from app.agents.comic_agent import generate_comic
         result = await generate_comic(state)
-    elif folder == "MEME":
-        from app.agents.meme_agent import generate_meme_article
-        result = await generate_meme_article(state)
+    elif folder == "GIF_LEARNING":
+        from app.agents.giphy_agent import generate_giphy_learning
+        result = await generate_giphy_learning(state)
     elif folder == "REELS":
         from app.agents.reels_agent import generate_reels
         result = await generate_reels(state)
@@ -157,7 +153,7 @@ if os.path.exists(frontend_dist_path):
         index_path = os.path.join(frontend_dist_path, "index.html")
         if os.path.exists(index_path):
             return FileResponse(index_path)
-        return {"message": "Welcome to KnowledgeForge API"}
+        return {"message": "Welcome to The way Gen_Z learn's API"}
 
     @app.get("/{catchall:path}")
     async def serve_react_app(catchall: str):
@@ -173,4 +169,4 @@ if os.path.exists(frontend_dist_path):
 else:
     @app.get("/")
     def read_root():
-        return {"message": "Welcome to KnowledgeForge API (Static assets not compiled)"}
+        return {"message": "Welcome to The way Gen_Z learn's API (Static assets not compiled)"}
