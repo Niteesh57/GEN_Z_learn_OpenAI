@@ -22,7 +22,7 @@ During this project, I moved the product from a limited and partly broken protot
 - I built **Reels**, a vertical 30-step learning flow with structured progression, unique narration per step, random Microsoft Natural voices, 30 visual CSS templates, and a varied set of animation treatments.
 - I improved the **Gaming** experience with a popup mode picker, Auto pick, eight different learning games, individual colour themes, completion screens, and stronger game prompts.
 - I added game reliability checks on both backend and frontend. Generated games are validated, retried when invalid, given a safe fallback when needed, and normalized before they reach the game component.
-- I improved **Comics** into a selectable universe experience with custom CSS worlds, multiple pages, narration, and structured panel generation.
+- I rebuilt **Comics** as a selectable, original-character experience with 24 colourful templates, local CSS canvases, multiple pages, narration, and structured panel generation.
 - I created the **Browser Lab** as a safe, macOS-inspired guided simulation with interactive fields, a dock, app previews, and genie-style minimize behaviour.
 - I replaced the old broken image-humour feature with **GIF Learning**. Alex, the default guide, explains the concept as one continuous story and connects every topic-specific GIPHY visual cue to the explanation before and after it.
 - I made GIF retrieval dynamic rather than static: the backend searches the learner’s topic and relevant keywords, avoids generic trending fallbacks, and verifies that unrelated topics return different visual result sets.
@@ -132,7 +132,7 @@ The frontend normalizes and de-duplicates game data again before rendering. This
 
 ### Comics
 
-Comics lets the learner select one of eight visual universes: DC Justice, Marvel Mashup, Disney Classic, Tom & Jerry, Kick Buttowski, Stranger Things, Ben 10, or Glitch Rider. The backend generates structured panel dialogue and selects from a local canvas library; the renderer loads the matching CSS bundle and can continue the story for up to four pages. Speech synthesis can narrate panel dialogue.
+Comics uses only original learning characters and settings. Learners can choose Byte Hero, Pixel Bot, Nova Alien, Fox Genius, Professor Panda, Wise Owl, Captain Cloud, Code Dragon, HeroVerse, Super Squad, Fairy Tales, Cat vs Mouse, Alien Morph, Mystery Town, Stunt Rider, Cyber Runner, Superhero Universe, Fantasy Kingdom, Robot Academy, Alien Adventures, Mystery Detectives, Pirate Legends, Space Explorers, or Ninja Academy. Each template has a small named cast—for example Alien Aster, Alien Azure, Alien Vartek, Rocket Bloom, Rocket Hunk, Detective Iris, Detective Miles, Dragon Vela, and Dragon Kairo. The backend rotates the cast over a page and sends each character's display name and gender metadata to the renderer, so female and male characters use the corresponding speech voice. Panel dialogue is injected into fixed, colourful local CSS canvases; the app never retrieves old or third-party templates.
 
 ### Browser Lab
 
@@ -291,6 +291,33 @@ uvicorn main:app --port 8000
 ```
 
 Open `http://localhost:8000` after the production build, or use the Vite URL during frontend development.
+
+## One-container Docker and Cloud Run deployment
+
+The root `Dockerfile` is a two-stage build: it compiles `frontend/`, copies the built files beside `backend/`, and starts FastAPI as the only HTTP server. This is the production layout used by Cloud Run, so the browser calls the API on the same origin and no separate frontend host or CORS configuration is needed.
+
+Build and run the same image locally:
+
+```bash
+docker build -t the-way-gen-z-learns .
+docker run --rm -p 8080:8080 --env-file backend/.env the-way-gen-z-learns
+```
+
+Open `http://localhost:8080`. The Docker build intentionally excludes `.env` files; do not use Docker build arguments for API keys.
+
+To deploy this single container from the repository root, first enable the required Google Cloud APIs and create Secret Manager secrets named `groq-api-key` and `giphy-api-key`. Grant the Cloud Run service identity the **Secret Manager Secret Accessor** role for those secrets. Then deploy:
+
+```bash
+gcloud services enable run.googleapis.com cloudbuild.googleapis.com artifactregistry.googleapis.com secretmanager.googleapis.com
+
+gcloud run deploy the-way-gen-z-learns \
+  --source . \
+  --region us-central1 \
+  --allow-unauthenticated \
+  --set-secrets=GROQ_API_KEY=groq-api-key:1,GIPHY_API_KEY=giphy-api-key:1
+```
+
+Cloud Build uses the root `Dockerfile`, and Cloud Run supplies the `PORT` environment variable. The container listens on `0.0.0.0:$PORT` (default `8080` locally), serves both the React UI and FastAPI API, and keeps runtime secrets outside the image.
 
 ## Verification commands
 

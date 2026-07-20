@@ -13,8 +13,11 @@ headers = {
 }
 
 COMIC_CLUSTERS = (
-    "dc_justice", "marvel_mashup", "disney", "tom_jerry",
-    "kick_buttowski", "stranger_things", "ben10", "glitch_rider",
+    "byte_hero", "pixel_bot", "nova_alien", "fox_genius", "professor_panda", "wise_owl",
+    "captain_cloud", "code_dragon", "hero_verse", "super_squad", "fairy_tales", "cat_vs_mouse",
+    "alien_morph", "mystery_town", "stunt_rider", "cyber_runner", "superhero_universe",
+    "fantasy_kingdom", "robot_academy", "alien_adventures", "mystery_detectives", "pirate_legends",
+    "space_explorers", "ninja_academy",
 )
 ALL_COMIC_CLUSTERS_FILTER = " or ".join(f"cluster eq '{cluster}'" for cluster in COMIC_CLUSTERS)
 

@@ -1,15 +1,19 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { generateComicPage } from '../../services/api';
+import '../../assets/comic-css/original-comics.css';
 
 const MAX_PAGES = 4;
-const FEMALE_CHARACTERS = ['wonderwoman', 'minnie', 'kendall', 'eleven'];
 
-const getVoiceForCharacter = (character: string, availableVoices: SpeechSynthesisVoice[]) => {
+const getVoiceForCharacter = (
+  character: string,
+  gender: 'female' | 'male' | undefined,
+  availableVoices: SpeechSynthesisVoice[]
+) => {
   if (availableVoices.length === 0) return null;
   if (!character) return availableVoices[0];
-  
-  const isFemale = FEMALE_CHARACTERS.includes(character.toLowerCase());
+
+  const isFemale = gender === 'female';
 
   if (isFemale) {
     const natasha = availableVoices.find(v => v.name.includes('Natasha'));
@@ -45,30 +49,40 @@ const getVoiceForCharacter = (character: string, availableVoices: SpeechSynthesi
    Cluster metadata (matches backend CLUSTER_ROSTER)
 ──────────────────────────────────────────────────────────────────────────────*/
 const CLUSTERS = [
-  { id: 'dc_justice',      name: 'DC Justice',         emoji: '🦇', color: '#2b1055', accent: '#ffeb3b', description: 'Batman, Superman & more explaining tech' },
-  { id: 'marvel_mashup',   name: 'Marvel Mashup',      emoji: '🕷️', color: '#ef233c', accent: '#fff',    description: 'Crossover heroes battle complex concepts' },
-  { id: 'disney',          name: 'Disney Classic',     emoji: '🐭', color: '#e60000', accent: '#ffcc00', description: 'Mickey & friends make it friendly' },
-  { id: 'tom_jerry',       name: 'Tom & Jerry',        emoji: '🐱', color: '#697d91', accent: '#f4d03f', description: 'Cat-and-mouse chaos explains algorithms' },
-  { id: 'kick_buttowski',  name: 'Kick Buttowski',     emoji: '🛹', color: '#2c3e50', accent: '#f1c40f', description: 'Daredevil stunts = performance concepts' },
-  { id: 'stranger_things', name: 'Stranger Things',    emoji: '💡', color: '#0b0b1a', accent: '#e50914', description: 'Hawkins mysteries = ML & AI secrets' },
-  { id: 'ben10',           name: 'Ben 10 Omnitrix',    emoji: '👽', color: '#0b1c0b', accent: '#39ff14', description: 'Alien transformations = data structures' },
-  { id: 'glitch_rider',    name: 'Glitch Rider',       emoji: '💻', color: '#0c0816', accent: '#00ffff', description: 'Cyberpunk pixel art for hackers' },
+  { id: 'byte_hero',          name: 'Byte Hero',          emoji: '⚡', color: '#3f2a9b', accent: '#ffe26e', description: 'HeroVerse learning power-ups' },
+  { id: 'pixel_bot',          name: 'Pixel Bot',          emoji: '🤖', color: '#006d70', accent: '#9ff6e8', description: 'Robot Academy builds ideas' },
+  { id: 'nova_alien',         name: 'Nova Alien',         emoji: '👾', color: '#54258b', accent: '#ffb3f2', description: 'Alien Adventures, one discovery at a time' },
+  { id: 'fox_genius',         name: 'Fox Genius',         emoji: '🦊', color: '#a84122', accent: '#ffd69a', description: 'Fairy Tales and clever clues' },
+  { id: 'professor_panda',    name: 'Professor Panda',    emoji: '🐼', color: '#0d5d49', accent: '#d1f7b5', description: 'Super Squad learning missions' },
+  { id: 'wise_owl',           name: 'Wise Owl',           emoji: '🦉', color: '#704018', accent: '#ffdc99', description: 'Mystery Town evidence trails' },
+  { id: 'captain_cloud',      name: 'Captain Cloud',      emoji: '🦾', color: '#145ca5', accent: '#bceeff', description: 'Space Explorers map the route' },
+  { id: 'code_dragon',        name: 'Code Dragon',        emoji: '🐉', color: '#942347', accent: '#ffbdd2', description: 'Ninja Academy practice paths' },
+  { id: 'hero_verse',         name: 'HeroVerse',          emoji: '🦸', color: '#3f2a9b', accent: '#ffe26e', description: 'Original hero-led learning' },
+  { id: 'super_squad',        name: 'Super Squad',        emoji: '🌟', color: '#0d5d49', accent: '#d1f7b5', description: 'A team challenge for each lesson' },
+  { id: 'fairy_tales',        name: 'Fairy Tales',        emoji: '🪄', color: '#9f3d7c', accent: '#ffd0ed', description: 'Story magic makes concepts memorable' },
+  { id: 'cat_vs_mouse',       name: 'Cat vs Mouse',       emoji: '🐾', color: '#b94f27', accent: '#ffe0a3', description: 'A playful original puzzle chase' },
+  { id: 'alien_morph',        name: 'Alien Morph',        emoji: '🛸', color: '#54258b', accent: '#ffb3f2', description: 'Transform a mystery into a clear answer' },
+  { id: 'mystery_town',       name: 'Mystery Town',       emoji: '🔎', color: '#704018', accent: '#ffdc99', description: 'Trace the clues to learn why' },
+  { id: 'stunt_rider',        name: 'Stunt Rider',        emoji: '🏍️', color: '#aa3918', accent: '#ffd19b', description: 'Fast, safe steps through tough topics' },
+  { id: 'cyber_runner',       name: 'Cyber Runner',       emoji: '💠', color: '#006d70', accent: '#9ff6e8', description: 'Race through a clear data route' },
+  { id: 'superhero_universe', name: 'Superhero Universe', emoji: '🦸', color: '#3f2a9b', accent: '#ffe26e', description: 'Original superhero study mission' },
+  { id: 'fantasy_kingdom',    name: 'Fantasy Kingdom',    emoji: '🧙', color: '#9f3d7c', accent: '#ffd0ed', description: 'An original kingdom of ideas' },
+  { id: 'robot_academy',      name: 'Robot Academy',      emoji: '🤖', color: '#006d70', accent: '#9ff6e8', description: 'Build knowledge block by block' },
+  { id: 'alien_adventures',   name: 'Alien Adventures',   emoji: '👽', color: '#54258b', accent: '#ffb3f2', description: 'Explore a new learning planet' },
+  { id: 'mystery_detectives', name: 'Mystery Detectives', emoji: '🕵️', color: '#704018', accent: '#ffdc99', description: 'Investigate the learning clues' },
+  { id: 'pirate_legends',     name: 'Pirate Legends',     emoji: '🏴‍☠️', color: '#0d5d49', accent: '#d1f7b5', description: 'Navigate a knowledge treasure map' },
+  { id: 'space_explorers',    name: 'Space Explorers',    emoji: '🚀', color: '#145ca5', accent: '#bceeff', description: 'Launch a guided learning voyage' },
+  { id: 'ninja_academy',      name: 'Ninja Academy',      emoji: '⚔️', color: '#942347', accent: '#ffbdd2', description: 'Practice precise learning moves' },
 ];
+const CLUSTER_IDS = new Set(CLUSTERS.map(cluster => cluster.id));
 
 /* ─────────────────────────────────────────────────────────────────────────────
    CSS Bundle loader — lazy-loads cluster CSS once per session
 ──────────────────────────────────────────────────────────────────────────────*/
-const loadedBundles = new Set<string>();
-function useClusterCSS(cssBundle: string | null) {
-  useEffect(() => {
-    if (!cssBundle || loadedBundles.has(cssBundle)) return;
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = `/comic-css/${cssBundle}`;
-    link.id = `comic-css-${cssBundle}`;
-    document.head.appendChild(link);
-    loadedBundles.add(cssBundle);
-  }, [cssBundle]);
+function useClusterCSS(_cssBundle: string | null) {
+  // Original comic CSS is bundled with the renderer.  Keeping this hook lets
+  // existing response payloads remain compatible without loading old bundles.
+  useEffect(() => undefined, []);
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -90,7 +104,7 @@ function ClusterSelector({ concept, onSelect }: { concept: string; onSelect: (id
           marginBottom: '8px',
           textTransform: 'uppercase'
         }}>
-          📖 CHOOSE YOUR COMIC UNIVERSE
+          📖 CHOOSE YOUR ORIGINAL COMIC TEMPLATE
         </div>
         <div style={{
           fontFamily: "'Comic Sans MS', cursive",
@@ -101,7 +115,7 @@ function ClusterSelector({ concept, onSelect }: { concept: string; onSelect: (id
           "{concept}"
         </div>
         <div style={{ fontSize: '12px', color: '#555', marginTop: '6px', fontFamily: 'monospace' }}>
-          Select a universe — your story will be told in that style
+          Select a colourful template — your story will be told in that style
         </div>
       </motion.div>
 
@@ -243,20 +257,21 @@ function ComicGenerating({ cluster }: { cluster: string }) {
 ──────────────────────────────────────────────────────────────────────────────*/
 const ComicRenderer = ({ data }: { data: any }) => {
   const content = data?.content;
+  const isSupportedContent = Boolean(content?.cluster && CLUSTER_IDS.has(content.cluster));
 
   // State
   const [selectedCluster, setSelectedCluster] = useState<string | null>(
-    content?.cluster && !content?.needs_selection ? content.cluster : null
+    isSupportedContent && !content?.needs_selection ? content.cluster : null
   );
   const [allPages, setAllPages] = useState<any[][]>(
-    content?.panels?.length > 0 ? [content.panels] : []
+    isSupportedContent && content?.panels?.length > 0 ? [content.panels] : []
   );
   const [currentPage, setCurrentPage] = useState(0);
   const [isLoadingNext, setIsLoadingNext] = useState(false);
   const [isFinished, setIsFinished] = useState(content?.is_finished ?? false);
   const [cssBundle, setCssBundle] = useState<string | null>(content?.css_bundle || null);
   
-  const [autoPlay, setAutoPlay] = useState(false);
+  const [autoPlay, setAutoPlay] = useState(true);
   const [activePanelIndex, setActivePanelIndex] = useState(0);
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
@@ -277,17 +292,17 @@ const ComicRenderer = ({ data }: { data: any }) => {
 
   // When data comes in from backend (after cluster selection triggers generation)
   useEffect(() => {
-    if (content?.panels && allPages.length === 0) {
+    if (isSupportedContent && content?.panels && allPages.length === 0) {
       setAllPages([content.panels]);
       setSelectedCluster(content.cluster);
       setCssBundle(content.css_bundle);
       setIsFinished(content.is_finished ?? false);
     }
-  }, [content]);
+  }, [content, isSupportedContent, allPages.length]);
 
   const handleClusterSelect = async (clusterId: string) => {
     setSelectedCluster(clusterId);
-    setCssBundle(`${clusterId}.css`);
+    setCssBundle('original-comics.css');
     setIsLoadingNext(true);
     try {
       const concept = data?.concept || '';
@@ -385,9 +400,9 @@ const ComicRenderer = ({ data }: { data: any }) => {
         cleanDialogue = cleanDialogue.slice(1, -1);
       }
       
-      const characterName = (panel.character || 'Narrator').replace(/[-_]/g, ' ').trim();
+      const characterName = (panel.character_name || panel.character || 'Narrator').replace(/[-_]/g, ' ').trim();
       
-      // Strip prefix like "Batman: " or "Batman says: " or "Batman - " case-insensitively
+      // Strip an optional narrator prefix such as "Byte Hero says: ".
       const escapedName = characterName.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
       const prefixRegex = new RegExp(`^${escapedName}\\s*(?:says)?\\s*[:\\-]\\s*`, 'i');
       if (prefixRegex.test(cleanDialogue)) {
@@ -405,7 +420,7 @@ const ComicRenderer = ({ data }: { data: any }) => {
       // PREVENT CHROME GARBAGE COLLECTION BUG
       utteranceRef.current = utterance;
       
-      const voice = getVoiceForCharacter(panel.character || '', voices);
+      const voice = getVoiceForCharacter(panel.character || '', panel.character_gender, voices);
       if (voice) {
         utterance.voice = voice;
         console.log(`[TTS] Speaking as ${characterName} using voice: ${voice.name}`);
@@ -441,7 +456,7 @@ const ComicRenderer = ({ data }: { data: any }) => {
   }, [autoPlay, activePanelIndex, currentPage, allPages, isLoadingNext, isFinished, handleNextPage]);
 
   /* ── Cluster selector screen ──────────────────────────────────────────── */
-  if (!selectedCluster && (!content?.panels || content?.needs_selection)) {
+  if (!selectedCluster && (!isSupportedContent || !content?.panels || content?.needs_selection)) {
     return (
       <ClusterSelector
         concept={data?.concept || 'the concept'}
@@ -464,7 +479,7 @@ const ComicRenderer = ({ data }: { data: any }) => {
     );
   }
 
-  const cluster = selectedCluster || content?.cluster || 'dc_justice';
+  const cluster = selectedCluster || content?.cluster || 'byte_hero';
   const clusterMeta = CLUSTERS.find(c => c.id === cluster) || CLUSTERS[0];
   const maxReached = allPages.length >= MAX_PAGES;
 

@@ -88,7 +88,7 @@ The frontend repeats defensive normalization in `games/gameData.ts`. This defens
 
 ### Comic agent
 
-`app/agents/comic_agent.py` requests a concise panel screenplay using an approved character roster, background, and pose. It sanitizes/parses the response, retrieves a matching local canvas from the in-memory canvas library, then injects text into the fixed canvas structure. The renderer later chooses the matching comic CSS bundle and may request up to four pages through `/generate-comic-page`.
+`app/agents/comic_agent.py` requests a concise panel screenplay using an approved original-character roster, background, and pose. Every roster has named female and male characters, and the assembler rotates cast members over a page, attaches display-name and gender metadata, sanitizes/parses the response, normalizes template choices to the approved set, and injects escaped text into a fixed local CSS canvas. It does not query remote or legacy comic canvases, so an old template cannot reappear. The renderer bundles the shared original-comics CSS, shows the selected character name, uses gender metadata for speech-voice selection, and may request up to four pages through `/generate-comic-page`.
 
 ### Browser agent
 
@@ -112,7 +112,7 @@ The strongest validation is implemented where data is most specialized:
 | --- | --- | --- |
 | Reels | Exact count, order, required text, uniqueness | Typed display and safe empty state |
 | Games | Playability rules per template, retry, fallback | De-duplication, clamps, type checks, item bounds |
-| Comics | JSON cleanup, canvas lookup fallback | Safe panel/page handling |
+| Comics | JSON cleanup, approved-template normalization, local canvas fallback | Safe panel/page handling |
 | Browser | Renderer-ready screen shape | Form state and required choice feedback |
 
 ### 3. Fallbacks keep lessons usable
@@ -126,6 +126,10 @@ Field length limits, fixed Reel count, bounded game level and item counts, and f
 ## Data stores and startup
 
 At FastAPI startup, `main.py` loads the local comic canvas collection into memory. GIPHY content is fetched only when a GIF Learning request is made. The application can serve a built frontend from `frontend/dist` using Starlette `StaticFiles`, which supports a single-service local or container deployment.
+
+## Container deployment
+
+The root `Dockerfile` builds the React app in a Node stage, copies `frontend/dist` beside the Python backend, and runs one Uvicorn/FastAPI ingress container. `main.py` serves both the static UI and API from that process. The command binds to `0.0.0.0:$PORT`, which is compatible with Cloud Run. `.dockerignore` excludes local environments, build output, and `.env` files; runtime keys are supplied through Cloud Run Secret Manager instead of being baked into the image.
 
 ## Extending safely
 

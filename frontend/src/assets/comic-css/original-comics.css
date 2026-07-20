@@ -1,0 +1,210 @@
+.original-comic-panel {
+  --comic-ink: #171423;
+  --comic-paper: #fff9ea;
+  --comic-primary: #5b4bff;
+  --comic-secondary: #ffb6e8;
+  --comic-accent: #ffe26e;
+  isolation: isolate;
+  min-height: 320px;
+  position: relative;
+  overflow: hidden;
+  display: block;
+  color: var(--comic-ink);
+  border: 4px solid var(--comic-ink);
+  background:
+    radial-gradient(circle at 9% 15%, rgba(255, 255, 255, .8) 0 4%, transparent 4.2%),
+    linear-gradient(132deg, var(--comic-secondary), var(--comic-primary));
+  font-family: "Courier New", monospace;
+}
+
+.original-comic-panel::before,
+.original-comic-panel::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  opacity: .38;
+}
+
+.original-comic-panel::before {
+  inset: 0;
+  background-image: radial-gradient(var(--comic-paper) 1px, transparent 1.7px);
+  background-size: 13px 13px;
+  mix-blend-mode: soft-light;
+}
+
+.original-comic-panel::after {
+  right: -55px;
+  bottom: -55px;
+  width: 215px;
+  height: 215px;
+  border: 22px solid var(--comic-accent);
+  border-radius: 50%;
+  transform: rotate(17deg);
+}
+
+.comic-template-pixel_bot,
+.comic-template-robot_academy,
+.comic-template-cyber_runner { --comic-primary: #087c84; --comic-secondary: #96f3dd; --comic-accent: #fff59d; }
+.comic-template-nova_alien,
+.comic-template-alien_morph,
+.comic-template-alien_adventures { --comic-primary: #6e36c6; --comic-secondary: #df9eff; --comic-accent: #b9ffb0; }
+.comic-template-fox_genius,
+.comic-template-fairy_tales,
+.comic-template-fantasy_kingdom { --comic-primary: #d45c33; --comic-secondary: #ffd18b; --comic-accent: #ffeff7; }
+.comic-template-professor_panda,
+.comic-template-super_squad,
+.comic-template-pirate_legends { --comic-primary: #176c55; --comic-secondary: #a6e8ba; --comic-accent: #ffe580; }
+.comic-template-wise_owl,
+.comic-template-cat_vs_mouse,
+.comic-template-mystery_town,
+.comic-template-mystery_detectives { --comic-primary: #8e4e21; --comic-secondary: #ffd079; --comic-accent: #d9edff; }
+.comic-template-captain_cloud,
+.comic-template-stunt_rider,
+.comic-template-space_explorers { --comic-primary: #1c78c9; --comic-secondary: #9ce5ff; --comic-accent: #ffe985; }
+.comic-template-code_dragon,
+.comic-template-ninja_academy { --comic-primary: #bd2e61; --comic-secondary: #ffafcc; --comic-accent: #fff0a8; }
+
+.original-comic-grain {
+  position: absolute;
+  inset: 0;
+  opacity: .16;
+  background: repeating-linear-gradient(-30deg, transparent 0 10px, rgba(255,255,255,.7) 10px 11px);
+  pointer-events: none;
+}
+
+.original-comic-orb {
+  position: absolute;
+  width: 95px;
+  height: 95px;
+  border: 5px solid var(--comic-ink);
+  border-radius: 50%;
+  background: var(--comic-accent);
+  box-shadow: 7px 7px 0 var(--comic-ink);
+  animation: original-orbit 4s ease-in-out infinite;
+}
+
+.orb-one { top: 32px; right: 42px; }
+.orb-two { bottom: 28px; left: 28px; width: 50px; height: 50px; animation-delay: -1.6s; }
+
+.original-comic-route {
+  position: absolute;
+  height: 16px;
+  border-top: 5px dashed var(--comic-ink);
+  opacity: .45;
+  transform-origin: left;
+}
+.route-one { width: 42%; top: 43%; left: 4%; transform: rotate(-20deg); }
+.route-two { width: 35%; right: 2%; bottom: 28%; transform: rotate(28deg); }
+
+.original-comic-caption {
+  position: absolute;
+  top: 13px;
+  left: 13px;
+  max-width: 64%;
+  padding: 7px 10px;
+  border: 3px solid var(--comic-ink);
+  background: var(--comic-paper);
+  box-shadow: 4px 4px 0 var(--comic-ink);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 1.1px;
+  text-transform: uppercase;
+}
+
+.original-comic-mascot {
+  position: absolute;
+  left: 15%;
+  bottom: 12px;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 116px;
+  height: 116px;
+  border: 5px solid var(--comic-ink);
+  border-radius: 40% 58% 45% 52%;
+  background: var(--comic-paper);
+  box-shadow: 8px 8px 0 var(--comic-ink);
+  animation: original-mascot-bob 2.7s ease-in-out infinite;
+}
+
+.original-comic-mark { font-size: 71px; line-height: 1; filter: drop-shadow(2px 3px 0 rgba(23,20,35,.28)); }
+.original-comic-shadow { position: absolute; bottom: -18px; width: 92px; height: 15px; border-radius: 50%; background: rgba(23,20,35,.23); z-index: -1; }
+.original-comic-character-name {
+  position: absolute;
+  z-index: 3;
+  left: 9%;
+  bottom: 8px;
+  max-width: 39%;
+  padding: 5px 8px;
+  border: 3px solid var(--comic-ink);
+  background: var(--comic-accent);
+  box-shadow: 3px 3px 0 var(--comic-ink);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+}
+.pose-action .original-comic-mascot { animation: original-mascot-action .52s ease-in-out infinite alternate; }
+.pose-thinking .original-comic-mascot { transform: rotate(-8deg); }
+.pose-pointing .original-comic-mascot { transform: rotate(8deg) translateY(-8px); }
+
+.original-comic-speech {
+  position: absolute;
+  z-index: 3;
+  top: 86px;
+  right: 20px;
+  width: min(57%, 310px);
+  padding: 16px;
+  border: 4px solid var(--comic-ink);
+  border-radius: 18px 18px 18px 2px;
+  background: var(--comic-paper);
+  box-shadow: 7px 7px 0 var(--comic-ink);
+  color: var(--comic-ink);
+  font-size: clamp(12px, 1.3vw, 16px);
+  font-weight: 700;
+  line-height: 1.48;
+}
+
+.original-comic-speech::after {
+  content: "";
+  position: absolute;
+  bottom: -22px;
+  left: 26px;
+  width: 25px;
+  height: 25px;
+  border-right: 4px solid var(--comic-ink);
+  border-bottom: 4px solid var(--comic-ink);
+  background: var(--comic-paper);
+  transform: skewY(25deg) rotate(25deg);
+}
+
+.original-comic-action {
+  position: absolute;
+  z-index: 4;
+  right: 11%;
+  bottom: 28px;
+  padding: 10px 13px;
+  border: 3px solid var(--comic-ink);
+  background: var(--comic-accent);
+  box-shadow: 4px 4px 0 var(--comic-ink);
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  transform: rotate(-7deg);
+  animation: original-action-pop 1.2s ease-in-out infinite alternate;
+}
+
+.original-comic-dots { position: absolute; right: 13px; bottom: 8px; font-size: 13px; font-weight: 900; letter-spacing: 3px; }
+
+@keyframes original-orbit { 0%,100% { transform: translateY(0) rotate(-7deg); } 50% { transform: translateY(-12px) rotate(8deg); } }
+@keyframes original-mascot-bob { 0%,100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-10px) rotate(3deg); } }
+@keyframes original-mascot-action { from { transform: translateX(-8px) rotate(-9deg) scale(1.02); } to { transform: translateX(8px) rotate(8deg) scale(1.08); } }
+@keyframes original-action-pop { from { transform: rotate(-7deg) scale(.94); } to { transform: rotate(4deg) scale(1.08); } }
+
+@media (max-width: 620px) {
+  .original-comic-panel { min-height: 290px; }
+  .original-comic-mascot { left: 7%; width: 94px; height: 94px; }
+  .original-comic-mark { font-size: 58px; }
+  .original-comic-speech { top: 75px; right: 12px; width: 61%; padding: 12px; }
+  .original-comic-caption { max-width: 71%; font-size: 8px; }
+}
