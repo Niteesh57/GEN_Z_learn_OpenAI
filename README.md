@@ -1,10 +1,22 @@
-# The way Gen_Z learn's
+# The Way Gen Z Learns
 
 The way Gen_Z learn's turns a learning prompt into an interactive lesson instead of a long static answer. Learners choose a mode from the sidebar, enter a topic, and receive a focused experience built from safe, structured data and React templates.
 
+## Explore the live application
+
+**[Open The Way Gen Z Learns](https://genzlearnopenai-production.up.railway.app)**
+
+The live application is deployed on Railway using a serverless deployment setup. The service sleeps after about five minutes without a request, so the first visit after idle time can have a short cold-start delay. Once it has started, open the link again or continue using the app normally.
+
+## Overal Summary: OpenAI, Codex, and GPT-5.6
+
+This project began with a simple idea: learning should be active, not passive. I wanted to move beyond traditional AI answers by turning lessons into interactive experiences like Reels, games, comics, GIFs, and browser simulations. Before this hackathon, I had an early prototype with limited functionality, but using **OpenAI Codex with GPT-5.6 Terra**  I transformed it into a complete learning platform. They helped me migrate and improve the codebase, build reusable templates, fix complex UI and backend issues, validate AI-generated content, and handle edge cases without breaking existing features. I also relied heavily on voice input because I type slowly—being able to describe ideas naturally and let Codex translate them into code made development much faster and helped turn my vision into a polished product.
+
+One thing that genuinely surprised me was how well Codex understood my existing project. It was able to digest the current codebase, understand how everything was connected, and quickly apply changes for new user requirements without breaking existing functionality. Even when I wanted to update both the implementation and the documentation, it could handle them together in a single workflow. That made development much faster and let me spend more time improving the learning experience instead of manually tracking changes. This reflects my personal experience using Codex during the project.
+
 ## Builder experience: Codex and GPT-5.6
 
-This project started from a personal concern about cognitive offloading: when learning is reduced to passive answers, it is easy to consume information without retaining or thinking through it. The goal was to let learners explore a topic in the medium they already enjoy—Reels, games, comics, GIFs, or guided browser experiences—so that learning feels more active and memorable.
+This project started from a personal concern about cognitive offloading: when learning is reduced to passive answers, it is easy to consume information without retaining or thinking through it. The goal was to let learners explore a topic in the medium they already enjoy Reels, games, comics, GIFs, or guided browser experiences—so that learning feels more active and memorable.
 
 Before this hackathon, the project had an earlier prototype with a comic feature and a broken image-humour feature. I had experimented with several AI tools and prompting styles, including examples and few-shot prompts, but often received incomplete functionality or generic interfaces that did not match the product I had in mind.
 
@@ -12,7 +24,9 @@ The Devpost hackathon credits gave me access to Codex with GPT-5.6 Terra. I used
 
 Codex and GPT-5.6 were especially useful for turning screenshots and short correction requests into targeted frontend and backend changes. They helped identify the relevant implementation area, preserve working features while making changes, create reusable templates, validate generated content, and resolve edge cases such as incomplete game data, repeated Reel content, narration behaviour, and topic-specific GIF selection. In my experience, this made it much easier to move from an idea in my head to a more polished, production-style implementation.
 
-I also used Codex’s advanced reasoning settings, from Light and Medium through High and Extra High. In my personal experience, High and especially Extra High gave the strongest results for larger migrations, complex UI corrections, reusable template creation, and edge-case fixes. GPT-5.6 was able to understand the existing implementation, compare it with my latest request, spot where a correction belonged, and make the change without losing the rest of the product flow. This is my experience using the tool during the project, not a formal benchmark.
+I also used Codex’s advanced reasoning settings, from Light and Medium through High and Extra High. In my personal experience, High and especially Extra High gave the strongest results for larger migrations, complex UI corrections, reusable template creation, and edge-case fixes. GPT-5.6 was able to understand the existing implementation, compare it with my latest request, spot where a correction belonged, and make the change without losing the rest of the product flow. This is my experience using the tool during the project.
+
+I type slowly, so voice input became one of the most useful parts of my own Codex workflow. I could speak an idea or UI correction, press Send, and let Codex turn that request into the relevant implementation work. That made it easier to explain the experience I wanted - for example, a new learning mode, a visual correction, or an edge case - without needing to write a long technical specification first. I especially enjoyed watching Codex connect those spoken ideas to the code and progressively improve the product.
 
 ### What I built and achieved
 
@@ -56,6 +70,8 @@ Reels is a focused, phone-sized vertical feed in the middle of the lesson canvas
 
 The LLM chooses the number of ordered steps the explanation needs—from **10 to 30**. A quick explanation commonly uses around 10–12, and detailed subjects can use up to 30. The maximum-depth outline below is used only when all 30 steps add new learning value:
 
+Example:
+
 | Steps | Purpose |
 | --- | --- |
 | 1–5 | Motivation, context, and foundations |
@@ -91,13 +107,13 @@ Effects replay when a Reel becomes active. `prefers-reduced-motion` disables the
 
 ### Narration
 
-Reels uses the browser's Speech Synthesis API. There is no voice dropdown in Reels. A different installed Microsoft Natural voice is randomly assigned to each Reel from the approved names:
+Reels, Comics, and GIF Learning share one approved Microsoft Natural voice catalogue and use the application's `POST /reels-narration` audio API. This avoids depending on a browser exposing its own speech-voice list. There is no voice dropdown in Reels: one named voice is randomly assigned to each Reel and its short name is displayed in the player.
 
 - Ava, Andrew, Emma, Brian, Jenny, Guy, Aria
 - Leah, Luke
-- William Multilingual, Natasha, William
+- William Multilingual, Natasha
 
-The narrator’s short name is displayed on the Reel and in the player header. If one of those voices is not installed or available in the browser, the Reel remains usable and advances without substituting an unapproved voice.
+The same service gives GIF Learning one consistent guide voice for a lesson. In Comics, character gender metadata selects a matching female or male voice from the approved catalogue, while the character name remains part of the story. The backend validates every requested voice ID before it sends audio back to the client.
 
 ## Gaming
 
@@ -140,7 +156,7 @@ Browser lessons are safe, simulated configuration walkthroughs. The renderer pre
 
 ### GIF Learning
 
-GIF Learning is one connected explanation led by the default guide, Alex. The backend searches GIPHY Sticker Search with the learner’s topic and its meaningful keywords, then the lesson generator places each cue between Alex's introduction and follow-up explanation. Generic trending content is never used as a fallback, so the visual cues remain topic-specific. The UI shows a vertical story, not a GIF gallery: no GIF counter, creator metadata, or separate card grid is shown. A valid `GIPHY_API_KEY` is required in `backend/.env`.
+GIF Learning is one connected explanation led by the default guide, Alex. The backend searches GIPHY Sticker Search with the learner’s topic and its meaningful keywords, then the lesson generator places each cue between Alex's introduction and follow-up explanation. Alex uses one consistent approved Microsoft Natural voice for the full lesson. Generic trending content is never used as a fallback, so the visual cues remain topic-specific. The UI shows a vertical story, not a GIF gallery: no GIF counter, creator metadata, or separate card grid is shown. A valid `GIPHY_API_KEY` is required in `backend/.env`.
 
 ## Architecture
 
@@ -165,7 +181,7 @@ flowchart LR
 
 ### Backend
 
-- **FastAPI** exposes generation and comic continuation endpoints.
+- **FastAPI** exposes generation, comic continuation, and approved Microsoft Natural narration endpoints.
 - **LangGraph** routes Game and Browser requests to their specialized agents. Reels, Comics, and GIF Learning have direct mode-specific paths so their contracts stay clear.
 - **LangChain Groq** supplies the LLM through `app/config.py`.
 - Startup preloads the local comic canvas store. GIFs are fetched only when GIF Learning is requested.
@@ -244,6 +260,8 @@ Response fields:
 
 Additional endpoints:
 
+- `POST /reels-narration` returns MP3 narration for a whitelisted Microsoft Natural voice. It is shared by Reels, Comics, and GIF Learning.
+
 - `POST /generate-comic-page` — creates the next page in a selected comic universe.
 - `GET /comic-clusters` — returns available comic cluster metadata.
 
@@ -254,6 +272,7 @@ Additional endpoints:
 - Python 3.10+
 - Node.js 20+
 - A Groq API key
+- Internet access for Microsoft Natural voice generation through `edge-tts`
 
 Create `backend/.env`:
 
