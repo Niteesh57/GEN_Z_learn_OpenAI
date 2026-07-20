@@ -2,6 +2,33 @@
 
 The way Gen_Z learn's turns a learning prompt into an interactive lesson instead of a long static answer. Learners choose a mode from the sidebar, enter a topic, and receive a focused experience built from safe, structured data and React templates.
 
+## Builder experience: Codex and GPT-5.6
+
+This project started from a personal concern about cognitive offloading: when learning is reduced to passive answers, it is easy to consume information without retaining or thinking through it. The goal was to let learners explore a topic in the medium they already enjoy—Reels, games, comics, GIFs, or guided browser experiences—so that learning feels more active and memorable.
+
+Before this hackathon, the project had an earlier prototype with a comic feature and a broken image-humour feature. I had experimented with several AI tools and prompting styles, including examples and few-shot prompts, but often received incomplete functionality or generic interfaces that did not match the product I had in mind.
+
+The Devpost hackathon credits gave me access to Codex with GPT-5.6 Terra. I used them to inspect and migrate the existing codebase, replace broken paths, and build the current experience end to end. The work included the Reels lesson flow and its 30 visual templates, comics, GIF Learning, the macOS-inspired Browser Lab, and the eight game templates.
+
+Codex and GPT-5.6 were especially useful for turning screenshots and short correction requests into targeted frontend and backend changes. They helped identify the relevant implementation area, preserve working features while making changes, create reusable templates, validate generated content, and resolve edge cases such as incomplete game data, repeated Reel content, narration behaviour, and topic-specific GIF selection. In my experience, this made it much easier to move from an idea in my head to a more polished, production-style implementation.
+
+I also used Codex’s advanced reasoning settings, from Light and Medium through High and Extra High. In my personal experience, High and especially Extra High gave the strongest results for larger migrations, complex UI corrections, reusable template creation, and edge-case fixes. GPT-5.6 was able to understand the existing implementation, compare it with my latest request, spot where a correction belonged, and make the change without losing the rest of the product flow. This is my experience using the tool during the project, not a formal benchmark.
+
+### What I built and achieved
+
+During this project, I moved the product from a limited and partly broken prototype to a multi-mode interactive learning platform.
+
+- I replaced the old, inconsistent interface with a clearer colourful learning workspace: readable text, centred lesson experiences, responsive layouts, and focused mode selection.
+- I built **Reels**, a vertical 30-step learning flow with structured progression, unique narration per step, random Microsoft Natural voices, 30 visual CSS templates, and a varied set of animation treatments.
+- I improved the **Gaming** experience with a popup mode picker, Auto pick, eight different learning games, individual colour themes, completion screens, and stronger game prompts.
+- I added game reliability checks on both backend and frontend. Generated games are validated, retried when invalid, given a safe fallback when needed, and normalized before they reach the game component.
+- I improved **Comics** into a selectable universe experience with custom CSS worlds, multiple pages, narration, and structured panel generation.
+- I created the **Browser Lab** as a safe, macOS-inspired guided simulation with interactive fields, a dock, app previews, and genie-style minimize behaviour.
+- I replaced the old broken image-humour feature with **GIF Learning**. Alex, the default guide, explains the concept as one continuous story and connects every topic-specific GIPHY visual cue to the explanation before and after it.
+- I made GIF retrieval dynamic rather than static: the backend searches the learner’s topic and relevant keywords, avoids generic trending fallbacks, and verifies that unrelated topics return different visual result sets.
+- I added safer generation boundaries and fallbacks so incomplete AI output does not break a lesson. Reels, games, comics, browser lessons, and GIF Learning all use structured content contracts instead of AI-generated UI code.
+- I documented the product, current features, architecture, reliability approach, API flow, and extension paths so the project can be maintained and expanded after the hackathon.
+
 The current product has five learning modes:
 
 | Mode | Best for | What the learner receives |

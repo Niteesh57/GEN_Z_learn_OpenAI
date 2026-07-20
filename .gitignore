@@ -48,3 +48,5 @@ Thumbs.db
 DEVPOST.md
 test.py
 output
+*.wav
+*.ipynb
