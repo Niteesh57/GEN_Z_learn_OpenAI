@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import type { GiphyGif, GiphyGuide, GiphyLessonBlock } from '../../types/chat';
+import { createReelNarration } from '../../services/api';
+import { randomNarrationVoice } from '../../constants/narrationVoices';
 
 interface GiphyLearningContent {
   concept?: string;
@@ -14,14 +16,6 @@ interface GiphyLearningRendererProps {
   data: { title?: string; content?: GiphyLearningContent };
 }
 
-const preferredGuideVoice = (voices: SpeechSynthesisVoice[]) => {
-  const voiceNames = [/Microsoft Andrew Online \(Natural\)/i, /Microsoft Brian Online \(Natural\)/i, /Microsoft Guy Online \(Natural\)/i, /Microsoft William Online \(Natural\)/i];
-  return voiceNames.map((pattern) => voices.find((voice) => pattern.test(voice.name))).find(Boolean)
-    || voices.find((voice) => voice.lang.startsWith('en') && /male|david|mark|daniel/i.test(voice.name))
-    || voices.find((voice) => voice.lang.startsWith('en'))
-    || voices[0];
-};
-
 export default function GiphyLearningRenderer({ data }: GiphyLearningRendererProps) {
   const content = data?.content ?? {};
   const guide = content.guide ?? { name: 'Alex', role: 'Visual learning guide' };
@@ -31,16 +25,10 @@ export default function GiphyLearningRenderer({ data }: GiphyLearningRendererPro
   const [visibleBlocks, setVisibleBlocks] = useState(1);
   const [autoPlay, setAutoPlay] = useState(true);
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const storyRef = useRef<HTMLDivElement>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const narrationRun = useRef(0);
-
-  useEffect(() => {
-    const loadVoices = () => setVoices(window.speechSynthesis.getVoices());
-    loadVoices();
-    window.speechSynthesis.onvoiceschanged = loadVoices;
-    return () => { window.speechSynthesis.onvoiceschanged = null; window.speechSynthesis.cancel(); };
-  }, []);
+  const guideVoice = useMemo(() => randomNarrationVoice('male'), []);
 
   useEffect(() => {
     storyRef.current?.scrollTo({ top: storyRef.current.scrollHeight, behavior: 'smooth' });
@@ -50,10 +38,12 @@ export default function GiphyLearningRenderer({ data }: GiphyLearningRendererPro
     const block = blocks[visibleBlocks - 1];
     const run = narrationRun.current + 1;
     narrationRun.current = run;
-    window.speechSynthesis.cancel();
     setIsSpeaking(false);
     if (!autoPlay || !block || visibleBlocks >= blocks.length) return;
 
+    let disposed = false;
+    let audioUrl: string | null = null;
+    const requestController = new AbortController();
     const continueStory = (delay: number) => window.setTimeout(() => {
       if (narrationRun.current === run) setVisibleBlocks((current) => Math.min(current + 1, blocks.length));
     }, delay);
@@ -64,25 +54,46 @@ export default function GiphyLearningRenderer({ data }: GiphyLearningRendererPro
     }
 
     const text = block.content?.trim();
-    const voice = preferredGuideVoice(voices);
-    if (!text || !voice) {
+    if (!text) {
       const timer = continueStory(2400);
       return () => { narrationRun.current += 1; window.clearTimeout(timer); };
     }
 
-    const startTimer = window.setTimeout(() => {
+    const playNarration = async () => {
       if (narrationRun.current !== run) return;
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.voice = voice;
-      utterance.lang = voice.lang;
-      utterance.rate = 1.01;
-      utterance.onstart = () => { if (narrationRun.current === run) setIsSpeaking(true); };
-      utterance.onend = () => { if (narrationRun.current === run) { setIsSpeaking(false); continueStory(500); } };
-      utterance.onerror = () => { if (narrationRun.current === run) { setIsSpeaking(false); continueStory(900); } };
-      window.speechSynthesis.speak(utterance);
+      try {
+        audioUrl = await createReelNarration(text, guideVoice.id, requestController.signal);
+        if (disposed || narrationRun.current !== run || !audioUrl) return;
+        const audio = new Audio(audioUrl);
+        audioRef.current = audio;
+        audio.onplay = () => { if (!disposed && narrationRun.current === run) setIsSpeaking(true); };
+        audio.onended = () => { if (!disposed && narrationRun.current === run) { setIsSpeaking(false); continueStory(500); } };
+        audio.onerror = () => { if (!disposed && narrationRun.current === run) { setIsSpeaking(false); continueStory(900); } };
+        await audio.play();
+      } catch {
+        if (!requestController.signal.aborted && !disposed && narrationRun.current === run) continueStory(900);
+      }
+    };
+    const startTimer = window.setTimeout(() => { void playNarration();
     }, 420);
-    return () => { narrationRun.current += 1; window.clearTimeout(startTimer); window.speechSynthesis.cancel(); };
-  }, [autoPlay, blocks, visibleBlocks, voices]);
+    return () => {
+      disposed = true;
+      narrationRun.current += 1;
+      requestController.abort();
+      window.clearTimeout(startTimer);
+      const audio = audioRef.current;
+      if (audio) {
+        audio.onplay = null;
+        audio.onended = null;
+        audio.onerror = null;
+        audio.pause();
+        audio.removeAttribute('src');
+        audio.load();
+        audioRef.current = null;
+      }
+      if (audioUrl) URL.revokeObjectURL(audioUrl);
+    };
+  }, [autoPlay, blocks, guideVoice.id, visibleBlocks]);
 
   if (!blocks.length || gifs.length === 0) {
     return <section className="giphy-learning-shell giphy-learning-empty"><span className="material-symbols-outlined">gif_box</span><p>GIF LEARNING</p><h2>Alex is ready to explain with visual cues.</h2><small>{content.message || 'Try the lesson again in a moment.'}</small></section>;
@@ -91,7 +102,7 @@ export default function GiphyLearningRenderer({ data }: GiphyLearningRendererPro
   const shownBlocks = blocks.slice(0, visibleBlocks);
   return <section className="giphy-learning-shell giphy-guided-story">
     <header className="giphy-learning-header">
-      <div className="giphy-guide-title"><span className="material-symbols-outlined">face_6</span><p>{guide.name.toUpperCase()} // {guide.role.toUpperCase()}</p><h2>{data.title || `GIF Learning: ${content.concept || 'your topic'}`}</h2></div>
+      <div className="giphy-guide-title"><span className="material-symbols-outlined">face_6</span><p>{guide.name.toUpperCase()} // {guide.role.toUpperCase()} // VOICE: {guideVoice.name.toUpperCase()}</p><h2>{data.title || `GIF Learning: ${content.concept || 'your topic'}`}</h2></div>
       <button type="button" onClick={() => setAutoPlay((value) => !value)} className="giphy-narration-toggle"><span className={`giphy-speaking ${isSpeaking ? 'is-active' : ''}`}><i /><i /><i /></span>{autoPlay ? 'Pause Alex' : 'Play Alex'}</button>
     </header>
     <div ref={storyRef} className="giphy-story-feed" aria-live="polite">

@@ -1,48 +1,10 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { generateComicPage } from '../../services/api';
+import { createReelNarration, generateComicPage } from '../../services/api';
+import { narrationVoiceFor } from '../../constants/narrationVoices';
 import '../../assets/comic-css/original-comics.css';
 
 const MAX_PAGES = 4;
-
-const getVoiceForCharacter = (
-  character: string,
-  gender: 'female' | 'male' | undefined,
-  availableVoices: SpeechSynthesisVoice[]
-) => {
-  if (availableVoices.length === 0) return null;
-  if (!character) return availableVoices[0];
-
-  const isFemale = gender === 'female';
-
-  if (isFemale) {
-    const natasha = availableVoices.find(v => v.name.includes('Natasha'));
-    if (natasha) return natasha;
-    const aria = availableVoices.find(v => v.name.includes('Aria'));
-    if (aria) return aria;
-  } else {
-    const william = availableVoices.find(v => v.name.includes('William'));
-    if (william) return william;
-    const roger = availableVoices.find(v => v.name.includes('Roger'));
-    if (roger) return roger;
-  }
-
-  // Filter out unstable 'Online (Natural)' voices which frequently fail with synthesis-failed
-  const localVoices = availableVoices.filter(v => v.localService === true && !v.name.includes('Online'));
-  const voicesToUse = localVoices.length > 0 ? localVoices : availableVoices;
-
-  const enVoices = voicesToUse.filter(v => v.lang.startsWith('en'));
-  const voicesToSearch = enVoices.length > 0 ? enVoices : voicesToUse;
-
-  if (isFemale) {
-    return voicesToSearch.find(v => v.name.toLowerCase().includes('zira') || v.name.toLowerCase().includes('female')) || voicesToSearch[0];
-  } else {
-    const maleVoices = voicesToSearch.filter(v => !v.name.toLowerCase().includes('zira') && !v.name.toLowerCase().includes('female'));
-    if (maleVoices.length === 0) return voicesToSearch[0];
-    const hash = character.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    return maleVoices[hash % maleVoices.length];
-  }
-};
 
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -273,22 +235,9 @@ const ComicRenderer = ({ data }: { data: any }) => {
   
   const [autoPlay, setAutoPlay] = useState(true);
   const [activePanelIndex, setActivePanelIndex] = useState(0);
-  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
-  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useClusterCSS(cssBundle);
-
-  useEffect(() => {
-    const synth = window.speechSynthesis;
-    const updateVoices = () => {
-      setVoices(synth.getVoices());
-    };
-    updateVoices();
-    synth.onvoiceschanged = updateVoices;
-    return () => {
-      synth.onvoiceschanged = null;
-    };
-  }, []);
 
   // When data comes in from backend (after cluster selection triggers generation)
   useEffect(() => {
@@ -365,9 +314,12 @@ const ComicRenderer = ({ data }: { data: any }) => {
   // AutoPlay effect
   useEffect(() => {
     if (!autoPlay || !currentPanels || currentPanels.length === 0 || isLoadingNext) {
-      window.speechSynthesis.cancel();
       return;
     }
+
+    let disposed = false;
+    let audioUrl: string | null = null;
+    const requestController = new AbortController();
 
     const speakPanel = async () => {
       if (activePanelIndex >= currentPanels.length) {
@@ -389,9 +341,6 @@ const ComicRenderer = ({ data }: { data: any }) => {
         return;
       }
 
-      // Cancel any ongoing speech before starting a new one
-      window.speechSynthesis.cancel();
-      
       const panel = currentPanels[activePanelIndex];
       let cleanDialogue = (panel.dialogue || '').replace(/[*_]/g, '').trim();
       
@@ -415,43 +364,44 @@ const ComicRenderer = ({ data }: { data: any }) => {
       }
       
       const text = `${characterName} says: ${cleanDialogue}`;
-      
-      const utterance = new SpeechSynthesisUtterance(text);
-      // PREVENT CHROME GARBAGE COLLECTION BUG
-      utteranceRef.current = utterance;
-      
-      const voice = getVoiceForCharacter(panel.character || '', panel.character_gender, voices);
-      if (voice) {
-        utterance.voice = voice;
-        console.log(`[TTS] Speaking as ${characterName} using voice: ${voice.name}`);
+      const characterGender = panel.character_gender === 'female' ? 'female' : 'male';
+      const narrator = narrationVoiceFor(characterGender, panel.character || characterName);
+
+      try {
+        audioUrl = await createReelNarration(text, narrator.id, requestController.signal);
+        if (disposed || !audioUrl) return;
+        const audio = new Audio(audioUrl);
+        audioRef.current = audio;
+        audio.onended = () => {
+          if (!disposed) setActivePanelIndex(prev => prev + 1);
+        };
+        audio.onerror = () => {
+          if (!disposed) window.setTimeout(() => setActivePanelIndex(prev => prev + 1), 900);
+        };
+        await audio.play();
+      } catch {
+        if (!disposed && !requestController.signal.aborted) {
+          window.setTimeout(() => setActivePanelIndex(prev => prev + 1), 900);
+        }
       }
-
-      utterance.onend = () => {
-        utteranceRef.current = null;
-        setActivePanelIndex(prev => prev + 1);
-      };
-
-      utterance.onerror = (e) => {
-        if (e.error === 'canceled' || e.error === 'interrupted') return;
-        console.error("Speech error", e);
-        utteranceRef.current = null;
-        // Wait 2 seconds before advancing to prevent rapid-fire error loops
-        setTimeout(() => {
-          setActivePanelIndex(prev => prev + 1);
-        }, 2000);
-      };
-
-      // Slight delay to ensure cancel() has processed
-      setTimeout(() => {
-        window.speechSynthesis.speak(utterance);
-      }, 50);
     };
 
     const timer = setTimeout(speakPanel, 500);
 
     return () => {
+      disposed = true;
+      requestController.abort();
       clearTimeout(timer);
-      window.speechSynthesis.cancel();
+      const audio = audioRef.current;
+      if (audio) {
+        audio.onended = null;
+        audio.onerror = null;
+        audio.pause();
+        audio.removeAttribute('src');
+        audio.load();
+        audioRef.current = null;
+      }
+      if (audioUrl) URL.revokeObjectURL(audioUrl);
     };
   }, [autoPlay, activePanelIndex, currentPage, allPages, isLoadingNext, isFinished, handleNextPage]);
 

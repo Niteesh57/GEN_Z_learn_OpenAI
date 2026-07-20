@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import type { ReelStep } from '../../types/chat';
 import { createReelNarration } from '../../services/api';
+import { NATURAL_NARRATION_VOICES, type NaturalNarrationVoice } from '../../constants/narrationVoices';
 
 interface ReelsRendererProps { data: any; }
 
@@ -12,35 +13,9 @@ const TEXT_EFFECTS = [
 ] as const;
 const REELS_NATURAL_VOICE_NAMES = /Microsoft (Ava|Andrew|Emma|Brian|Jenny|Guy|Aria|Leah|Luke|William Multilingual|Natasha|William) Online \(Natural\)/i;
 
-interface ReelVoiceProfile {
-  id: string;
-  name: string;
-  browserPattern: RegExp;
-}
-
-interface ReelNarrator extends ReelVoiceProfile {
+interface ReelNarrator extends NaturalNarrationVoice {
   browserVoice?: SpeechSynthesisVoice;
 }
-
-// The names are real speaker names, not the regular-expression alternatives.
-// The browser voice is used when it is available; otherwise the same named
-// Microsoft Natural voice is requested from the app's narration endpoint.
-const REEL_VOICE_PROFILES: ReelVoiceProfile[] = [
-  { id: 'en-US-AvaMultilingualNeural', name: 'Ava', browserPattern: /Microsoft Ava Online \(Natural\)/i },
-  { id: 'en-US-AndrewMultilingualNeural', name: 'Andrew', browserPattern: /Microsoft Andrew Online \(Natural\)/i },
-  { id: 'en-US-EmmaMultilingualNeural', name: 'Emma', browserPattern: /Microsoft Emma Online \(Natural\)/i },
-  { id: 'en-US-BrianMultilingualNeural', name: 'Brian', browserPattern: /Microsoft Brian Online \(Natural\)/i },
-  { id: 'en-US-JennyNeural', name: 'Jenny', browserPattern: /Microsoft Jenny Online \(Natural\)/i },
-  { id: 'en-US-GuyNeural', name: 'Guy', browserPattern: /Microsoft Guy Online \(Natural\)/i },
-  { id: 'en-US-AriaNeural', name: 'Aria', browserPattern: /Microsoft Aria Online \(Natural\)/i },
-  { id: 'en-ZA-LeahNeural', name: 'Leah', browserPattern: /Microsoft Leah Online \(Natural\)/i },
-  { id: 'en-ZA-LukeNeural', name: 'Luke', browserPattern: /Microsoft Luke Online \(Natural\)/i },
-  { id: 'en-AU-WilliamMultilingualNeural', name: 'William Multilingual', browserPattern: /Microsoft William Multilingual Online \(Natural\)/i },
-  { id: 'en-AU-NatashaNeural', name: 'Natasha', browserPattern: /Microsoft Natasha Online \(Natural\)/i },
-  // Microsoft currently exposes the Australian William cloud voice as the
-  // Multilingual variant.  It remains the fallback for the "William" profile.
-  { id: 'en-AU-WilliamMultilingualNeural', name: 'William', browserPattern: /Microsoft William Online \(Natural\)/i },
-];
 
 const shuffle = <T,>(values: T[]): T[] => {
   const result = [...values];
@@ -61,7 +36,7 @@ const narratorName = (narrator?: ReelNarrator) => narrator?.browserVoice
   : narrator?.name || 'Narrator';
 
 const assignVoices = (voices: SpeechSynthesisVoice[], count: number) => {
-  const narrators = REEL_VOICE_PROFILES.map((profile) => ({
+  const narrators = NATURAL_NARRATION_VOICES.map((profile) => ({
     ...profile,
     browserVoice: voices.find((voice) => profile.browserPattern.test(voice.name)),
   }));
