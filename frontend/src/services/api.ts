@@ -23,3 +23,12 @@ export const generateComicPage = async (concept: string, cluster: string, page_n
   const response = await apiClient.post('/generate-comic-page', { concept, cluster, page_num, story_so_far });
   return response.data;
 };
+
+export const createReelNarration = async (text: string, voiceId: string, signal?: AbortSignal): Promise<string> => {
+  const response = await apiClient.post<Blob>(
+    '/reels-narration',
+    { text, voice_id: voiceId },
+    { responseType: 'blob', signal }
+  );
+  return URL.createObjectURL(new Blob([response.data], { type: 'audio/mpeg' }));
+};

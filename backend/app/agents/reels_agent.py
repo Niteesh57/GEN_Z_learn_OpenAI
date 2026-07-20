@@ -7,7 +7,9 @@ from app.config import get_llm
 from app.graph.state import AgentState
 
 
-REEL_COUNT = 30
+MIN_REEL_COUNT = 10
+MAX_REEL_COUNT = 30
+DEFAULT_FALLBACK_REEL_COUNT = 10
 
 
 def _text(value: Any, maximum: int) -> str:
@@ -28,15 +30,19 @@ def _extract_json(content: Any) -> Dict[str, Any]:
 
 def _validate_reels(data: Dict[str, Any], concept: str) -> Tuple[bool, str, List[Dict[str, Any]]]:
     raw_reels = data.get("reels")
-    if not isinstance(raw_reels, list) or len(raw_reels) != REEL_COUNT:
-        return False, "Return exactly 30 reels.", []
+    if not isinstance(raw_reels, list) or not MIN_REEL_COUNT <= len(raw_reels) <= MAX_REEL_COUNT:
+        return False, f"Return between {MIN_REEL_COUNT} and {MAX_REEL_COUNT} reels.", []
+
+    declared_count = data.get("reel_count")
+    if declared_count is not None and declared_count != len(raw_reels):
+        return False, "reel_count must match the number of reels returned.", []
 
     cleaned: List[Dict[str, Any]] = []
     seen_titles = set()
     seen_voiceovers = set()
     for expected_step, reel in enumerate(raw_reels, 1):
         if not isinstance(reel, dict) or reel.get("step") != expected_step:
-            return False, "Steps must be the unique contiguous numbers 1 through 30.", []
+            return False, "Steps must be unique contiguous numbers starting at 1.", []
         title = _text(reel.get("title"), 56)
         hook = _text(reel.get("hook"), 90)
         body = _text(reel.get("body"), 260)
@@ -96,7 +102,10 @@ def _fallback_reels(concept: str) -> Dict[str, Any]:
         ("You are ready", "Use this framework to explore a more detailed example next."),
     ]
     reels = []
-    for index, (title, explanation) in enumerate(stages, 1):
+    # A deterministic minimum-length fallback is used only when the LLM fails.
+    # Normal Reel length is selected exclusively by the LLM prompt.
+    reel_count = DEFAULT_FALLBACK_REEL_COUNT
+    for index, (title, explanation) in enumerate(stages[:reel_count], 1):
         reels.append({
             "step": index,
             "title": title,
@@ -106,8 +115,9 @@ def _fallback_reels(concept: str) -> Dict[str, Any]:
             "voiceover": f"Step {index} for {topic}. {explanation}",
         })
     return {
-        "title": f"{topic}: 30-step Reel Guide",
+        "title": f"{topic}: {reel_count}-step Reel Guide",
         "concept": topic,
+        "reel_count": reel_count,
         "reels": reels,
     }
 
@@ -115,14 +125,15 @@ def _fallback_reels(concept: str) -> Dict[str, Any]:
 REELS_PROMPT = PromptTemplate.from_template("""
 You are an expert micro-learning director creating an educational vertical Reel series about: '{concept}'.
 
-Create exactly 30 sequential reels. Together they must teach the topic from first intuition to practical use.
+Choose the shortest complete lesson length from 10 to 30 reels. Do not pad a simple topic to reach 30.
+Use around 10-12 for a quick explanation, 13-20 for a normal topic, and 21-30 only when the topic genuinely needs mechanics, edge cases, and practical use.
+Together the chosen reels must teach the topic from first intuition to a clear conclusion.
 Each reel advances the explanation by ONE new idea. Never restate a previous reel, never use filler, and never repeat a title, example, or voiceover.
 
 The experience behaves like a thoughtful short-video lesson:
-- Reels 1-5: motivation, context, and foundations.
-- Reels 6-20: the precise mechanics in a logical order.
-- Reels 21-26: edge cases, trade-offs, and practical use.
-- Reels 27-30: practice, recap, and a memorable conclusion.
+- Start with motivation or context when more than one Reel is needed.
+- Use the middle reels for precise mechanics in a logical order.
+- Add edge cases, trade-offs, practice, and recap only when they add a new learning value.
 - Use factual, concise, beginner-friendly language. Explain technical terms before relying on them.
 - body is 1-2 short sentences. voiceover is 1-3 natural spoken sentences and must be unique.
 - Do not use markdown, emojis, HTML, or code fences.
@@ -131,6 +142,7 @@ Return raw JSON only, matching this exact shape:
 {{
   "title": "Short series title",
   "concept": "{concept}",
+  "reel_count": 10,
   "reels": [
     {{
       "step": 1,
@@ -155,8 +167,9 @@ async def generate_reels(state: AgentState) -> Dict[str, Any]:
         if not valid:
             raise ValueError(reason)
         content = {
-            "title": _text(data.get("title"), 90) or f"{concept}: 30-step Reel Guide",
+            "title": _text(data.get("title"), 90) or f"{concept}: {len(reels)}-step Reel Guide",
             "concept": _text(data.get("concept"), 90) or concept,
+            "reel_count": len(reels),
             "reels": reels,
         }
     except Exception as error:
@@ -167,6 +180,6 @@ async def generate_reels(state: AgentState) -> Dict[str, Any]:
         "router_decision": "REELS",
         "template": "REELS_FEED",
         "title": content["title"],
-        "description": f"A 30-step vertical Reel lesson about {content['concept']}.",
+        "description": f"A {len(content['reels'])}-step vertical Reel lesson about {content['concept']}.",
         "content": content,
     }

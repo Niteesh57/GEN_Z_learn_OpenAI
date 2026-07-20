@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import type { ReelStep } from '../../types/chat';
+import { createReelNarration } from '../../services/api';
 
 interface ReelsRendererProps { data: any; }
 
@@ -10,6 +11,36 @@ const TEXT_EFFECTS = [
   'terminal-slider', 'letter-burst', 'underline', 'scramble', 'jello', 'shimmer', 'hand-drawn', 'liquid',
 ] as const;
 const REELS_NATURAL_VOICE_NAMES = /Microsoft (Ava|Andrew|Emma|Brian|Jenny|Guy|Aria|Leah|Luke|William Multilingual|Natasha|William) Online \(Natural\)/i;
+
+interface ReelVoiceProfile {
+  id: string;
+  name: string;
+  browserPattern: RegExp;
+}
+
+interface ReelNarrator extends ReelVoiceProfile {
+  browserVoice?: SpeechSynthesisVoice;
+}
+
+// The names are real speaker names, not the regular-expression alternatives.
+// The browser voice is used when it is available; otherwise the same named
+// Microsoft Natural voice is requested from the app's narration endpoint.
+const REEL_VOICE_PROFILES: ReelVoiceProfile[] = [
+  { id: 'en-US-AvaMultilingualNeural', name: 'Ava', browserPattern: /Microsoft Ava Online \(Natural\)/i },
+  { id: 'en-US-AndrewMultilingualNeural', name: 'Andrew', browserPattern: /Microsoft Andrew Online \(Natural\)/i },
+  { id: 'en-US-EmmaMultilingualNeural', name: 'Emma', browserPattern: /Microsoft Emma Online \(Natural\)/i },
+  { id: 'en-US-BrianMultilingualNeural', name: 'Brian', browserPattern: /Microsoft Brian Online \(Natural\)/i },
+  { id: 'en-US-JennyNeural', name: 'Jenny', browserPattern: /Microsoft Jenny Online \(Natural\)/i },
+  { id: 'en-US-GuyNeural', name: 'Guy', browserPattern: /Microsoft Guy Online \(Natural\)/i },
+  { id: 'en-US-AriaNeural', name: 'Aria', browserPattern: /Microsoft Aria Online \(Natural\)/i },
+  { id: 'en-ZA-LeahNeural', name: 'Leah', browserPattern: /Microsoft Leah Online \(Natural\)/i },
+  { id: 'en-ZA-LukeNeural', name: 'Luke', browserPattern: /Microsoft Luke Online \(Natural\)/i },
+  { id: 'en-AU-WilliamMultilingualNeural', name: 'William Multilingual', browserPattern: /Microsoft William Multilingual Online \(Natural\)/i },
+  { id: 'en-AU-NatashaNeural', name: 'Natasha', browserPattern: /Microsoft Natasha Online \(Natural\)/i },
+  // Microsoft currently exposes the Australian William cloud voice as the
+  // Multilingual variant.  It remains the fallback for the "William" profile.
+  { id: 'en-AU-WilliamMultilingualNeural', name: 'William', browserPattern: /Microsoft William Online \(Natural\)/i },
+];
 
 const shuffle = <T,>(values: T[]): T[] => {
   const result = [...values];
@@ -25,11 +56,18 @@ const voiceUserName = (voice?: SpeechSynthesisVoice) => voice?.name
   .replace(/\s+Online\s*\(Natural\).*$/i, '')
   .trim() || 'Narrator';
 
+const narratorName = (narrator?: ReelNarrator) => narrator?.browserVoice
+  ? voiceUserName(narrator.browserVoice)
+  : narrator?.name || 'Narrator';
+
 const assignVoices = (voices: SpeechSynthesisVoice[], count: number) => {
-  if (!voices.length) return Array<SpeechSynthesisVoice | undefined>(count).fill(undefined);
-  let pool: SpeechSynthesisVoice[] = [];
+  const narrators = REEL_VOICE_PROFILES.map((profile) => ({
+    ...profile,
+    browserVoice: voices.find((voice) => profile.browserPattern.test(voice.name)),
+  }));
+  let pool: ReelNarrator[] = [];
   return Array.from({ length: count }, () => {
-    if (!pool.length) pool = shuffle(voices);
+    if (!pool.length) pool = shuffle(narrators);
     return pool.pop();
   });
 };
@@ -41,7 +79,10 @@ export default function ReelsRenderer({ data }: ReelsRendererProps) {
   const [autoPlay, setAutoPlay] = useState(true);
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isPreparingNarration, setIsPreparingNarration] = useState(false);
+  const [narrationError, setNarrationError] = useState(false);
   const feedRef = useRef<HTMLDivElement>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const narrationRun = useRef(0);
   const templateOrder = useMemo(() => shuffle(TEMPLATE_IDS), []);
 
@@ -54,19 +95,44 @@ export default function ReelsRenderer({ data }: ReelsRendererProps) {
   }, [reels.length]);
 
   useEffect(() => {
+    const synth = window.speechSynthesis;
+    if (!synth) return undefined;
+
+    let retryTimer: number | undefined;
+    let attempts = 0;
     const loadVoices = () => {
-      const available = window.speechSynthesis.getVoices().filter((voice) => REELS_NATURAL_VOICE_NAMES.test(voice.name));
-      setVoices(available);
+      const available = synth.getVoices();
+      const naturalVoices = available.filter((voice) => typeof voice.name === 'string' && REELS_NATURAL_VOICE_NAMES.test(voice.name));
+      setVoices((previous) => {
+        const previousIds = previous.map((voice) => `${voice.voiceURI}:${voice.name}`).join('|');
+        const nextIds = naturalVoices.map((voice) => `${voice.voiceURI}:${voice.name}`).join('|');
+        return previousIds === nextIds ? previous : naturalVoices;
+      });
+
+      if (naturalVoices.length && retryTimer !== undefined) {
+        window.clearInterval(retryTimer);
+        retryTimer = undefined;
+      }
     };
     loadVoices();
-    window.speechSynthesis.onvoiceschanged = loadVoices;
+    synth.onvoiceschanged = loadVoices;
+    // Browsers do not all fire onvoiceschanged on first load, so retry briefly.
+    retryTimer = window.setInterval(() => {
+      attempts += 1;
+      loadVoices();
+      if (attempts >= 12 && retryTimer !== undefined) {
+        window.clearInterval(retryTimer);
+        retryTimer = undefined;
+      }
+    }, 500);
     return () => {
-      window.speechSynthesis.onvoiceschanged = null;
-      window.speechSynthesis.cancel();
+      if (retryTimer !== undefined) window.clearInterval(retryTimer);
+      synth.onvoiceschanged = null;
+      synth.cancel();
     };
   }, []);
 
-  const reelVoices = useMemo(() => assignVoices(voices, reels.length), [reels.length, voices]);
+  const reelNarrators = useMemo(() => assignVoices(voices, reels.length), [reels.length, voices]);
 
   useEffect(() => {
     const feed = feedRef.current;
@@ -85,42 +151,102 @@ export default function ReelsRenderer({ data }: ReelsRendererProps) {
 
   useEffect(() => {
     const reel = reels[currentIndex];
+    const narrator = reelNarrators[currentIndex];
     const run = narrationRun.current + 1;
     narrationRun.current = run;
-    window.speechSynthesis.cancel();
+    const synth = window.speechSynthesis;
+    synth?.cancel();
     setIsSpeaking(false);
-    if (!autoPlay || !reel) return;
+    setIsPreparingNarration(false);
+    if (!autoPlay || !reel || !narrator) return undefined;
 
+    let disposed = false;
+    let audioUrl: string | null = null;
+    const requestController = new AbortController();
     const moveNext = () => {
       if (narrationRun.current !== run || currentIndex >= reels.length - 1) return;
       window.setTimeout(() => { if (narrationRun.current === run) goTo(currentIndex + 1); }, 650);
     };
+    const failNarration = () => {
+      if (disposed || narrationRun.current !== run) return;
+      setIsPreparingNarration(false);
+      setIsSpeaking(false);
+      setNarrationError(true);
+      setAutoPlay(false);
+    };
+    const playServerVoice = async () => {
+      setNarrationError(false);
+      setIsPreparingNarration(true);
+      try {
+        audioUrl = await createReelNarration(
+          reel.voiceover || `${reel.hook} ${reel.body}`,
+          narrator.id,
+          requestController.signal,
+        );
+        if (disposed || narrationRun.current !== run || !audioUrl) return;
+        const audio = new Audio(audioUrl);
+        audioRef.current = audio;
+        audio.onplay = () => {
+          if (!disposed && narrationRun.current === run) {
+            setIsPreparingNarration(false);
+            setIsSpeaking(true);
+          }
+        };
+        audio.onended = () => {
+          if (disposed || narrationRun.current !== run) return;
+          setIsPreparingNarration(false);
+          setIsSpeaking(false);
+          moveNext();
+        };
+        audio.onerror = failNarration;
+        await audio.play();
+      } catch {
+        if (!requestController.signal.aborted) failNarration();
+      }
+    };
     const beginTimer = window.setTimeout(() => {
       if (narrationRun.current !== run) return;
-      const voice = reelVoices[currentIndex];
-      if (!voice) {
-        window.setTimeout(moveNext, 5200);
+      if (!narrator.browserVoice || !synth) {
+        void playServerVoice();
         return;
       }
       const utterance = new SpeechSynthesisUtterance(reel.voiceover || `${reel.hook} ${reel.body}`);
-      utterance.voice = voice;
-      utterance.lang = voice.lang;
+      utterance.voice = narrator.browserVoice;
+      utterance.lang = narrator.browserVoice.lang;
       utterance.rate = 1.02;
       utterance.pitch = 1;
       utterance.onstart = () => { if (narrationRun.current === run) setIsSpeaking(true); };
       utterance.onend = () => { if (narrationRun.current === run) { setIsSpeaking(false); moveNext(); } };
       utterance.onerror = () => { if (narrationRun.current === run) { setIsSpeaking(false); moveNext(); } };
-      window.speechSynthesis.speak(utterance);
+      synth.speak(utterance);
     }, 900);
-    return () => { narrationRun.current += 1; window.clearTimeout(beginTimer); window.speechSynthesis.cancel(); };
-  }, [autoPlay, currentIndex, goTo, reelVoices, reels]);
+    return () => {
+      disposed = true;
+      narrationRun.current += 1;
+      requestController.abort();
+      window.clearTimeout(beginTimer);
+      synth?.cancel();
+      const audio = audioRef.current;
+      if (audio) {
+        audio.onplay = null;
+        audio.onended = null;
+        audio.onerror = null;
+        audio.pause();
+        audio.removeAttribute('src');
+        audio.load();
+        audioRef.current = null;
+      }
+      if (audioUrl) URL.revokeObjectURL(audioUrl);
+    };
+  }, [autoPlay, currentIndex, goTo, reelNarrators, reels]);
 
   if (!reels.length) return <div className="reels-empty">No Reel lesson is available yet. Start a new Reels session with a topic.</div>;
 
-  const narratorName = voiceUserName(reelVoices[currentIndex]);
+  const currentNarrator = reelNarrators[currentIndex];
+  const currentNarratorName = narratorName(currentNarrator);
 
   return <div className="reels-shell">
-    <header className="reels-topbar"><div><span className="material-symbols-outlined">smart_display</span><p>KNOWLEDGE REELS</p><strong>{title}</strong></div><div className="reels-controls"><span className={`reels-speaking ${isSpeaking ? 'is-active' : ''}`}><i /><i /><i />{isSpeaking ? `Narrating: ${narratorName}` : autoPlay ? `Next voice: ${narratorName}` : 'Paused'}</span><button type="button" onClick={() => setAutoPlay((value) => !value)}>{autoPlay ? <span className="material-symbols-outlined">pause</span> : <span className="material-symbols-outlined">play_arrow</span>}{autoPlay ? 'Pause' : 'Play'}</button></div></header>
+    <header className="reels-topbar"><div><span className="material-symbols-outlined">smart_display</span><p>KNOWLEDGE REELS</p><strong>{title}</strong></div><div className="reels-controls"><span className={`reels-speaking ${isSpeaking ? 'is-active' : ''}`}><i /><i /><i />{isSpeaking ? `Narrating: ${currentNarratorName}` : isPreparingNarration ? `Preparing voice: ${currentNarratorName}` : narrationError ? `Voice unavailable: ${currentNarratorName}` : autoPlay ? `Selected voice: ${currentNarratorName}` : 'Paused'}</span><button type="button" onClick={() => setAutoPlay((value) => !value)}>{autoPlay ? <span className="material-symbols-outlined">pause</span> : <span className="material-symbols-outlined">play_arrow</span>}{autoPlay ? 'Pause' : 'Play'}</button></div></header>
     <div className="reels-stage">
       <aside className="reels-progress" aria-label="Reel progress">{reels.map((reel, index) => <button type="button" key={reel.step} onClick={() => goTo(index)} aria-label={`Go to reel ${reel.step}`} className={index === currentIndex ? 'is-active' : index < currentIndex ? 'is-seen' : ''}>{String(reel.step).padStart(2, '0')}</button>)}</aside>
       <div ref={feedRef} className="reels-feed">{reels.map((reel, index) => {
@@ -130,9 +256,9 @@ export default function ReelsRenderer({ data }: ReelsRendererProps) {
         const useWordAnimation = textEffect === 'word-blur' || textEffect === 'pop-up';
         return <section key={reel.step} className={`reel-slide ${index === currentIndex ? 'is-active' : ''}`}><motion.article initial={{ opacity: 0, scale: .96 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ amount: .55, once: false }} transition={{ type: 'spring', stiffness: 220, damping: 25 }} className={`reel-card reel-template-${template} reel-motion-${textEffect}`}>
           <span className="reel-orb reel-orb-a" /><span className="reel-orb reel-orb-b" /><span className="reel-grid" />
-          <header><span>STEP <b className="reel-step-number">{String(reel.step).padStart(2, '0')}</b></span><span className="material-symbols-outlined">volume_up</span></header>
+          <header><span>STEP <b className="reel-step-number">{String(reel.step).padStart(2, '0')}</b></span><span className="reel-voice-label"><span className="material-symbols-outlined">record_voice_over</span>VOICE: {narratorName(reelNarrators[index])}</span></header>
           <div className="reel-copy"><p className="reel-hook">{reel.hook}</p><h2 className="reel-title" data-title={reel.title}>{useWordAnimation ? titleWords.map((word, wordIndex) => <span key={`${word}-${wordIndex}`} className="reel-title-word" style={{ animationDelay: `${wordIndex * 80}ms` }}>{word}{wordIndex < titleWords.length - 1 ? ' ' : ''}</span>) : reel.title}</h2><p className="reel-body">{reel.body}</p></div>
-          <footer><span className="material-symbols-outlined">lightbulb</span><p>{reel.takeaway}</p><span className="reel-narrator"><span className="material-symbols-outlined">record_voice_over</span>{voiceUserName(reelVoices[index])}</span></footer>
+          <footer><span className="material-symbols-outlined">lightbulb</span><p>{reel.takeaway}</p><span className="reel-narrator"><span className="material-symbols-outlined">record_voice_over</span>VOICE: {narratorName(reelNarrators[index])}</span></footer>
           <div className="reel-template-mark">{String(template + 1).padStart(2, '0')}</div>
         </motion.article></section>;
       })}</div>

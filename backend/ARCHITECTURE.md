@@ -64,12 +64,12 @@ The LangGraph workflow has three nodes: `route_experience`, `GAME`, and `BROWSER
 
 `app/agents/reels_agent.py` owns the Reels contract.
 
-- Generates exactly 30 sequential lessons.
+- Lets the LLM select a 10–30 sequential Reel lesson using only the steps the topic needs.
 - Requires `step`, `title`, `hook`, `body`, `takeaway`, and `voiceover` on every Reel.
-- Enforces step numbers 1–30 with no gaps.
+- Enforces contiguous step numbers starting at 1 with no gaps.
 - Limits field lengths so text fits compact visual cards.
 - Rejects duplicate titles and duplicate narration.
-- Falls back to an ordered 30-step lesson if generation or JSON parsing fails.
+- Falls back to a concise ordered lesson if generation or JSON parsing fails.
 
 The React Reels renderer owns all visual variation: 30 CSS templates, randomized order, active-card animation effects, browser narration, and scroll navigation. The agent never produces CSS or animation names.
 
@@ -110,7 +110,7 @@ The strongest validation is implemented where data is most specialized:
 
 | Content | Server checks | Client checks |
 | --- | --- | --- |
-| Reels | Exact count, order, required text, uniqueness | Typed display and safe empty state |
+| Reels | LLM-selected 10–30 count, order, required text, uniqueness | Typed display and safe empty state |
 | Games | Playability rules per template, retry, fallback | De-duplication, clamps, type checks, item bounds |
 | Comics | JSON cleanup, approved-template normalization, local canvas fallback | Safe panel/page handling |
 | Browser | Renderer-ready screen shape | Form state and required choice feedback |
@@ -121,7 +121,7 @@ If an LLM request, JSON parse, or specialized validation fails, the mode returns
 
 ### 4. Bounded output controls performance
 
-Field length limits, fixed Reel count, bounded game level and item counts, and fixed comic page limits prevent oversized responses from creating slow or unusable screens. FastAPI handlers and LangChain Groq calls are asynchronous so independent requests do not block the ASGI event loop during network waiting.
+Field length limits, a maximum of 30 Reels, bounded game level and item counts, and fixed comic page limits prevent oversized responses from creating slow or unusable screens. FastAPI handlers and LangChain Groq calls are asynchronous so independent requests do not block the ASGI event loop during network waiting.
 
 ## Data stores and startup
 

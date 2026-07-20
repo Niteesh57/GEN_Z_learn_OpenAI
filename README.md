@@ -19,7 +19,7 @@ I also used Codex’s advanced reasoning settings, from Light and Medium through
 During this project, I moved the product from a limited and partly broken prototype to a multi-mode interactive learning platform.
 
 - I replaced the old, inconsistent interface with a clearer colourful learning workspace: readable text, centred lesson experiences, responsive layouts, and focused mode selection.
-- I built **Reels**, a vertical 30-step learning flow with structured progression, unique narration per step, random Microsoft Natural voices, 30 visual CSS templates, and a varied set of animation treatments.
+- I built **Reels**, an LLM-sized 10–30 step learning flow with structured progression, unique narration per step, random Microsoft Natural voices, 30 visual CSS templates, and a varied set of animation treatments.
 - I improved the **Gaming** experience with a popup mode picker, Auto pick, eight different learning games, individual colour themes, completion screens, and stronger game prompts.
 - I added game reliability checks on both backend and frontend. Generated games are validated, retried when invalid, given a safe fallback when needed, and normalized before they reach the game component.
 - I rebuilt **Comics** as a selectable, original-character experience with 24 colourful templates, local CSS canvases, multiple pages, narration, and structured panel generation.
@@ -33,7 +33,7 @@ The current product has five learning modes:
 
 | Mode | Best for | What the learner receives |
 | --- | --- | --- |
-| **Reels** | A guided overview of a topic | A vertical, short-form 30-step lesson with narration and animated visual cards. |
+| **Reels** | A guided overview of a topic | A vertical, short-form lesson with 10–30 purposeful narrated cards. |
 | **Gaming** | Recall, classification, order, and relationships | One of eight playable micro-games with feedback and level completion. |
 | **Comics** | Stories, metaphors, and high-level flows | A selectable comic universe with paginated, narrated panels. |
 | **Browser** | Configuration and click-through procedures | A macOS-inspired browser lab with a guided form workflow and animated dock. |
@@ -52,9 +52,9 @@ The current product has five learning modes:
 
 Reels is a focused, phone-sized vertical feed in the middle of the lesson canvas—not a full-screen black panel. It is designed to teach one connected idea at a time.
 
-### 30-step lesson structure
+### LLM-sized 10–30 Reel lesson structure
 
-Every generated Reel lesson has exactly **30 ordered steps**:
+The LLM chooses the number of ordered steps the explanation needs—from **10 to 30**. A quick explanation commonly uses around 10–12, and detailed subjects can use up to 30. The maximum-depth outline below is used only when all 30 steps add new learning value:
 
 | Steps | Purpose |
 | --- | --- |
@@ -63,7 +63,7 @@ Every generated Reel lesson has exactly **30 ordered steps**:
 | 21–26 | Edge cases, trade-offs, and practical use |
 | 27–30 | Practice, recap, and a memorable conclusion |
 
-Each step contains a `title`, `hook`, `body`, `takeaway`, and `voiceover`. The Reels agent checks that all 30 steps are present, numbering is contiguous, required text exists, and titles and narration are not duplicated. If the AI response is incomplete or malformed, it returns a structured 30-step fallback lesson instead of a broken feed.
+Each step contains a `title`, `hook`, `body`, `takeaway`, and `voiceover`. The Reels agent checks that the LLM-selected count stays within 10–30, numbering is contiguous, required text exists, and titles and narration are not duplicated. If the AI response is incomplete or malformed, it returns a safe 10-Reel fallback lesson instead of a broken feed.
 
 ### Templates and animation system
 
@@ -236,8 +236,8 @@ Response fields:
 {
   "medium": "REELS",
   "template": "REELS_FEED",
-  "title": "Binary Search: 30-step Reel Guide",
-  "description": "A 30-step vertical Reel lesson about binary search.",
+  "title": "Binary Search: 12-step Reel Guide",
+  "description": "A 12-step vertical Reel lesson about binary search.",
   "content": {}
 }
 ```

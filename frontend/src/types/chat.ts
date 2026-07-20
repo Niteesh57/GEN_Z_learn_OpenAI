@@ -116,6 +116,7 @@ export interface Experience {
     // Reels
     title?: string;
     concept?: string;
+    reel_count?: number;
     reels?: ReelStep[];
     // GIF Learning
     gifs?: GiphyGif[];

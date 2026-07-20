@@ -2,9 +2,9 @@ import os
 from typing import Optional
 
 from dotenv import load_dotenv
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -82,6 +82,57 @@ class ComicPageRequest(BaseModel):
     cluster: str
     page_num: int = 2
     story_so_far: str = ""
+
+
+class ReelsNarrationRequest(BaseModel):
+    text: str
+    voice_id: str
+
+
+REELS_NARRATION_VOICES = {
+    "en-US-AvaMultilingualNeural",
+    "en-US-AndrewMultilingualNeural",
+    "en-US-EmmaMultilingualNeural",
+    "en-US-BrianMultilingualNeural",
+    "en-US-JennyNeural",
+    "en-US-GuyNeural",
+    "en-US-AriaNeural",
+    "en-ZA-LeahNeural",
+    "en-ZA-LukeNeural",
+    "en-AU-WilliamMultilingualNeural",
+    "en-AU-NatashaNeural",
+}
+
+
+@app.post("/reels-narration")
+async def reels_narration_endpoint(request: ReelsNarrationRequest):
+    """Generate one short Reel narration with an approved Microsoft Natural voice."""
+    text = " ".join(request.text.split())
+    if not text:
+        raise HTTPException(status_code=422, detail="Narration text is required.")
+    if len(text) > 2_200:
+        raise HTTPException(status_code=422, detail="Narration text is too long.")
+    if request.voice_id not in REELS_NARRATION_VOICES:
+        raise HTTPException(status_code=422, detail="The requested Reel voice is not allowed.")
+
+    try:
+        import edge_tts
+    except ImportError as exc:
+        raise HTTPException(status_code=503, detail="Reels voice service is not installed.") from exc
+
+    audio = bytearray()
+    try:
+        communicate = edge_tts.Communicate(text, voice=request.voice_id, rate="+2%")
+        async for chunk in communicate.stream():
+            if chunk["type"] == "audio":
+                audio.extend(chunk["data"])
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail="Reels voice service is temporarily unavailable.") from exc
+
+    if not audio:
+        raise HTTPException(status_code=503, detail="Reels voice service returned no audio.")
+
+    return Response(content=bytes(audio), media_type="audio/mpeg")
 
 
 @app.post("/generate-comic-page")
