@@ -24,9 +24,11 @@ The Devpost hackathon credits gave me access to Codex with GPT-5.6 Terra. I used
 
 Codex and GPT-5.6 were especially useful for turning screenshots and short correction requests into targeted frontend and backend changes. They helped identify the relevant implementation area, preserve working features while making changes, create reusable templates, validate generated content, and resolve edge cases such as incomplete game data, repeated Reel content, narration behaviour, and topic-specific GIF selection. In my experience, this made it much easier to move from an idea in my head to a more polished, production-style implementation.
 
-I also used Codex’s advanced reasoning settings, from Light and Medium through High and Extra High. In my personal experience, High and especially Extra High gave the strongest results for larger migrations, complex UI corrections, reusable template creation, and edge-case fixes. GPT-5.6 was able to understand the existing implementation, compare it with my latest request, spot where a correction belonged, and make the change without losing the rest of the product flow. This is my experience using the tool during the project.
+I also used Codex’s advanced reasoning settings, from Light and Medium through High and Extra High. In my personal experience, High and especially Extra High gave the strongest results for larger migrations, complex UI corrections, reusable template creation, and edge-case fixes. GPT-5.6 was able to understand the existing implementation, compare it with my latest request, spot where a correction belonged, and make the change without losing the rest of the product flow. 
 
 I type slowly, so voice input became one of the most useful parts of my own Codex workflow. I could speak an idea or UI correction, press Send, and let Codex turn that request into the relevant implementation work. That made it easier to explain the experience I wanted - for example, a new learning mode, a visual correction, or an edge case - without needing to write a long technical specification first. I especially enjoyed watching Codex connect those spoken ideas to the code and progressively improve the product.
+
+**This is my experience using the tool during the project.**
 
 ### What I built and achieved
 
